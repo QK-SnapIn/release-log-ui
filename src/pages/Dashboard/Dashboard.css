@@ -1,0 +1,808 @@
+/* ═══════════════════════════════════════
+   Dashboard v2
+   ═══════════════════════════════════════ */
+
+/* ── Greeting ── */
+.dash-greeting-v2 {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.dash-date-v2 {
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-weight: 500;
+    margin: 0 0 4px;
+}
+
+.dash-hello-v2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.dash-name-v2 {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--indigo);
+}
+
+/* CTA Button — uses global .btn .btn-primary, with optional shadow */
+.dash-cta-v2 {
+    box-shadow: var(--shm);
+}
+
+/* ── Stats Row ── */
+.dash-stats-v2 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.dash-stat-v2 {
+    padding: 20px 22px;
+    border-radius: var(--r);
+    background: var(--white);
+    border: 1px solid var(--border-l);
+    box-shadow: var(--sh);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.dash-stat-icon-v2 {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dash-stat-number-v2 {
+    font-size: 1.625rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1;
+}
+
+.dash-stat-label-v2 {
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.dash-stat-change-v2 {
+    font-size: 0.8rem;
+    color: var(--m2);
+    margin-top: 3px;
+}
+
+/* ── Two Column Layout ── */
+.dash-two-col {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    align-items: start;
+}
+
+/* ── Cards ── */
+.dash-card-v2 {
+    border-radius: var(--r);
+    background: var(--white);
+    border: 1px solid var(--border-l);
+    box-shadow: var(--sh);
+    overflow: hidden;
+}
+
+.dash-card-header {
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-l);
+}
+
+.dash-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.dash-view-all {
+    font-size: 0.8rem;
+    color: var(--indigo);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ── Notes Content (scrollable) ── */
+.dash-notes-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* ── Note Rows ── */
+.dash-note-row-v2 {
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: background .12s;
+}
+
+.dash-note-row-v2:hover {
+    background: var(--bg);
+}
+
+.dash-note-icon-v2 {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--s1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    flex-shrink: 0;
+}
+
+.dash-note-title-v2 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dash-note-meta-v2 {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 2px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.dash-note-date-v2 {
+    font-size: 0.8rem;
+    color: var(--m2);
+    font-family: var(--mono);
+    white-space: nowrap;
+}
+
+.dash-note-delete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--m2);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all .15s;
+    opacity: 0;
+}
+
+.dash-note-row-v2:hover .dash-note-delete-btn {
+    opacity: 1;
+}
+
+.dash-note-delete-btn:hover {
+    background: var(--rl);
+    color: var(--rose);
+}
+
+/* ── Published Badge ── */
+.dash-llm-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--t2);
+    background: var(--s1);
+    padding: 2px 7px;
+    border-radius: 6px;
+}
+
+.dash-published-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--emerald);
+    background: var(--el);
+    padding: 2px 7px;
+    border-radius: 6px;
+}
+
+/* ── Empty State ── */
+.dash-empty-v2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+    text-align: center;
+}
+
+.dash-empty-icon-v2 {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--s1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--m2);
+    margin-bottom: 14px;
+}
+
+/* ── Activity Feed ── */
+.dash-activity-card {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.dash-activity-item {
+    padding: 10px 18px;
+    display: flex;
+    gap: 12px;
+}
+
+.dash-activity-timeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding-top: 3px;
+}
+
+.dash-activity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.dash-activity-line {
+    width: 1px;
+    flex: 1;
+    background: var(--border-l);
+    min-height: 24px;
+}
+
+/* ── Activity Feed (timeline) ── */
+.activity-feed {
+    padding: 16px 18px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    display: flex;
+    gap: 14px;
+    cursor: pointer;
+}
+
+.activity-item:hover .activity-title {
+    color: var(--indigo);
+}
+
+.activity-timeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 4px;
+}
+
+.activity-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.activity-line {
+    width: 1.5px;
+    flex: 1;
+    background: var(--border-l);
+    min-height: 20px;
+}
+
+.activity-content {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 20px;
+}
+
+.activity-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+    transition: color .15s;
+}
+
+.activity-desc {
+    font-size: 0.875rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.activity-config {
+    font-size: 0.8rem;
+    color: var(--sky);
+    font-weight: 500;
+    font-family: var(--mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.activity-msg {
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.activity-msg.success {
+    color: var(--emerald);
+}
+
+.activity-msg.error {
+    color: var(--rose);
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: var(--m2);
+}
+
+/* ═══════════════════════════
+   Generate View – v2
+   ═══════════════════════════ */
+
+/* TopBar action buttons — use global .btn .btn-secondary */
+
+/* Source Cards */
+.gen-source-grid-v2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.gen-source-btn-v2 {
+    padding: 20px;
+    border-radius: var(--r);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all .15s;
+}
+
+.gen-source-btn-v2.active {
+    background: var(--il);
+}
+
+.gen-source-icon-v2 {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+/* Continue / Generate buttons — use global .btn .btn-primary */
+.gen-generate-btn {
+    box-shadow: var(--shm);
+}
+
+/* Config inputs */
+.gen-config-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--t2);
+    display: block;
+    margin: 0 0 4px;
+}
+
+.gen-config-input {
+    width: 100%;
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 0.9375rem;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color .15s;
+    margin: 0;
+    min-height: 38px;
+}
+
+.gen-config-input:focus {
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+}
+
+/* ── Selector v2 shared styles ── */
+.selector-card-v2 {
+    border-radius: var(--r);
+    background: var(--white);
+    border: 1px solid var(--border-l);
+    box-shadow: var(--sh);
+    overflow: hidden;
+}
+
+.selector-sidebar-v2 {
+    border-right: 1px solid var(--border-l);
+    padding: 10px;
+}
+
+.selector-sidebar-header-v2 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--m2);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: 8px 8px 6px;
+}
+
+.selector-search-v2 {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 0.875rem;
+    font-family: var(--font);
+    margin: 0 0 6px;
+    transition: border-color .15s;
+    min-height: 38px;
+}
+
+.selector-search-v2:focus {
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+}
+
+.selector-repo-btn-v2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 400;
+    font-family: var(--font);
+    background: transparent;
+    color: var(--muted);
+    transition: background .1s;
+}
+
+.selector-repo-btn-v2:hover {
+    background: var(--s1);
+}
+
+.selector-repo-btn-v2.active {
+    background: var(--il);
+    color: var(--it);
+    font-weight: 600;
+}
+
+.selector-filter-row-v2 {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.selector-filter-select-v2 {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-family: var(--font);
+    background: var(--white);
+    margin: 0;
+    min-height: 38px;
+}
+
+.selector-list-header-v2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0 12px;
+    color: var(--muted);
+    font-size: 0.875rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.selector-item-v2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--white);
+    border: 1px solid var(--border-l);
+    cursor: pointer;
+    transition: all .12s;
+}
+
+.selector-item-v2.selected {
+    /* background: var(--el); */
+    border-left-color: var(--emerald);
+}
+
+.selector-checkbox-v2 {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    border: 1.5px solid var(--s2);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.selector-checkbox-v2.checked {
+    border: none;
+    background: var(--emerald);
+}
+
+.selector-footer-v2 {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-l);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+}
+
+/* ── Selector Grids ── */
+.selector-grid-2col {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    height: 480px;
+}
+
+.selector-grid-3col {
+    display: grid;
+    grid-template-columns: 200px 1fr 1fr;
+    height: 480px;
+}
+
+.selector-jira-wrap {
+    display: flex;
+    flex-direction: column;
+    height: 540px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1023px) {
+    .dash-two-col {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .dash-stats-v2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gen-source-grid-v2 {
+        grid-template-columns: 1fr;
+    }
+
+    .selector-grid-3col {
+        grid-template-columns: 180px 1fr;
+        height: 420px;
+    }
+
+    .selector-grid-3col > :nth-child(2) {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .dash-greeting-v2 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .dash-hello-v2 {
+        font-size: 1.5rem;
+    }
+
+    .dash-stats-v2 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .dash-stat-v2 {
+        padding: 16px 18px;
+    }
+
+    .dash-note-row-v2 {
+        padding: 12px 16px;
+    }
+
+    .dash-note-date-v2 {
+        display: none;
+    }
+
+    .gen-source-grid-v2 {
+        grid-template-columns: 1fr;
+    }
+
+    .selector-grid-2col,
+    .selector-grid-3col {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .selector-grid-2col .selector-sidebar-v2,
+    .selector-grid-3col .selector-sidebar-v2 {
+        border-right: none;
+        border-bottom: 1px solid var(--border-l);
+        max-height: 180px;
+        overflow-y: auto;
+    }
+
+    .selector-grid-3col > :nth-child(2) {
+        display: block;
+        border-right: none;
+        border-bottom: 1px solid var(--border-l);
+        max-height: 180px;
+        overflow-y: auto;
+    }
+
+    .selector-jira-wrap {
+        height: auto;
+        max-height: 80vh;
+    }
+
+    .selector-filter-row-v2 {
+        flex-direction: column;
+    }
+
+    .config-layout {
+        flex-direction: column;
+    }
+
+    .config-summary-col {
+        order: -1;
+    }
+}
+
+@media (max-width: 480px) {
+    .dash-stats-v2 {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-hello-v2 {
+        font-size: 1.25rem;
+    }
+
+    .dash-stat-v2 {
+        padding: 14px 16px;
+    }
+
+    .dash-stat-icon-v2 {
+        width: 38px;
+        height: 38px;
+    }
+
+    .dash-stat-number-v2 {
+        font-size: 1.375rem;
+    }
+}
+
+/* ── Step 3 Config Layout ── */
+.config-layout {
+    display: flex;
+    gap: 28px;
+}
+
+.config-form-col {
+    flex: 3;
+    min-width: 0;
+}
+
+.config-summary-col {
+    flex: 2;
+    min-width: 0;
+}
+
+.config-summary-card {
+    background: var(--bg);
+    border: 1px solid var(--border-l);
+    border-radius: var(--r);
+    padding: 20px;
+    position: sticky;
+    top: 100px;
+}
+
+.config-summary-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.config-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.config-summary-label {
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.config-summary-value {
+    font-size: 0.875rem;
+    color: var(--text);
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Advanced Options */
+.config-advanced {
+    border-top: 1px solid var(--border-l);
+    padding-top: 16px;
+}
+
+.config-advanced-toggle {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text);
+    padding: 4px 0;
+}

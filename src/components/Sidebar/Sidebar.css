@@ -1,0 +1,179 @@
+/* ── Sidebar v2 – Always Expanded ── */
+.sidebar-v2 {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--white);
+    border-right: 1px solid var(--border-l);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    padding-top: 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 50;
+}
+
+/* Logo Row */
+.sidebar-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding: 0 4px;
+    height: 64px;
+}
+
+.sidebar-logo {
+    height: 30px;
+    min-width: 36px;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.sidebar-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.sidebar-brand {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+/* Nav */
+.sidebar-nav-v2 {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+/* Nav Button */
+.sidebar-btn {
+    height: 42px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 10px;
+    background: transparent;
+    color: var(--m2);
+    transition: all .15s ease;
+    position: relative;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sidebar-btn:hover {
+    background: var(--s1);
+    color: var(--text);
+}
+
+.sidebar-btn.active {
+    background: var(--s1);
+    color: var(--text);
+}
+
+/* Icon container */
+.sidebar-btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+}
+
+.sidebar-btn-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* Label */
+.sidebar-btn-label {
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+/* Active indicator stripe */
+.sidebar-btn.active::before {
+    content: '';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    margin-top: -8px;
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--indigo);
+}
+
+/* ── Bottom Nav (Mobile) ── */
+.bottom-nav {
+    display: none;
+}
+
+/* ── Mobile: Convert sidebar to bottom nav ── */
+@media (max-width: 768px) {
+    .sidebar-v2 {
+        display: none;
+    }
+
+    .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: var(--white);
+        border-top: 1px solid var(--border-l);
+        z-index: 50;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0 8px;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .bottom-nav-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 6px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: var(--m2);
+        transition: all .15s;
+        min-width: 60px;
+    }
+
+    .bottom-nav-btn:hover,
+    .bottom-nav-btn.active {
+        color: var(--text);
+        background: var(--s1);
+    }
+
+    .bottom-nav-btn .bottom-nav-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bottom-nav-btn .bottom-nav-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .bottom-nav-btn .bottom-nav-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+}
