@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Sparkles, FileText, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../lib/api';
+import { useEntitlements } from '../../hooks/useEntitlements';
 import { providerColors, CustomTooltip } from './settingsData.jsx';
 
 export default function UsageMetrics() {
+  const { entitlements, usage } = useEntitlements();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -52,6 +54,42 @@ export default function UsageMetrics() {
           <div className="stat-label"><TrendingUp size={14} /> Avg Tokens / Gen</div>
           <div className="stat-value">{avgTokens.toLocaleString()}</div>
           <div className="stat-sub">Per generation</div>
+        </div>
+      </div>
+
+      {/* Plan Usage Limits */}
+      <div className="s-card" style={{ marginBottom: 20 }}>
+        <div className="section-title">Plan Usage</div>
+        <div className="section-desc">Your current usage this billing period</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 12 }}>
+          {[
+            { label: 'Generations', used: usage?.generations_this_month ?? 0, limit: entitlements?.max_generations_per_month },
+            { label: 'Publishes', used: usage?.publishes_this_month ?? 0, limit: entitlements?.max_publishes_per_month },
+            { label: 'Projects', used: usage?.projects_count ?? 0, limit: entitlements?.max_projects },
+          ].map(({ label, used, limit }) => {
+            const isUnlimited = limit === -1;
+            const max = isUnlimited ? 1 : (limit || 1);
+            const pct = isUnlimited ? 0 : Math.min(100, (used / max) * 100);
+            return (
+              <div key={label}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
+                  <span className="form-label" style={{ margin: 0 }}>{label}</span>
+                  <span style={{ color: 'var(--muted)', fontSize: 12 }}>
+                    {used} / {isUnlimited ? 'Unlimited' : limit}
+                  </span>
+                </div>
+                {!isUnlimited && (
+                  <div style={{ height: 8, borderRadius: 4, background: 'var(--border)', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%', borderRadius: 4,
+                      background: pct >= 90 ? 'var(--rose)' : pct >= 70 ? 'var(--amber)' : 'var(--indigo)',
+                      width: `${pct}%`, transition: 'width 0.3s ease',
+                    }} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
