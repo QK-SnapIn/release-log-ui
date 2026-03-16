@@ -40,8 +40,8 @@ export default function LandingPage() {
     <div className="landing-root">
       <SEO
         title="AI-Powered Release Notes Generator"
-        description="Generate polished release notes from GitHub commits, Jira sprints, and DevRev issues. Connect your tools, pick changes, and let AI write your release notes."
-        keywords="release notes generator, AI release notes, GitHub release notes, Jira release notes, changelog automation, DevRev"
+        description="Automatically generate release notes from GitHub commits, Jira issues, and DevRev sprints. AI-powered changelog generator for dev teams. Free to start."
+        keywords="release notes generator, AI release notes, automatic changelog, GitHub release notes generator, Jira release notes, changelog automation, DevRev release notes, software release notes tool, automated release notes, release notes from commits, sprint release notes, AI changelog generator, release management tool, product changelog, release notes template, generate release notes from git"
         canonical="https://releaslyy.com/"
       >
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />

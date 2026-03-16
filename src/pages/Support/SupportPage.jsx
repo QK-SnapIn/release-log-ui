@@ -23,9 +23,9 @@ export default function SupportPage() {
   return (
     <div className="landing-root">
       <SEO
-        title="Support"
-        description="Get help with Releaslyy. Contact our support team, report bugs, or request features for the AI release notes generator."
-        keywords="Releaslyy support, help, contact, bug report, feature request"
+        title="Support & Help"
+        description="Get help with Releaslyy. Contact support, report bugs, request features, or learn how to generate release notes from GitHub, Jira, and DevRev."
+        keywords="Releaslyy support, Releaslyy help, release notes help, changelog tool support, contact Releaslyy"
         canonical="https://releaslyy.com/support"
       />
       <div className="land-noise" />

@@ -47,8 +47,8 @@ const Login = () => {
         <div className="login-wrapper">
             <SEO
                 title="Sign In"
-                description="Sign in to Releaslyy with Google or email to start generating AI-powered release notes for your projects."
-                keywords="Releaslyy login, sign in, Google OAuth"
+                description="Sign in to Releaslyy to generate AI-powered release notes from GitHub, Jira, and DevRev. Login with Google or email."
+                keywords="Releaslyy login, sign in, release notes login, changelog tool login"
                 canonical="https://releaslyy.com/login"
             />
             <button className="back-btn" onClick={() => navigate('/')}>
