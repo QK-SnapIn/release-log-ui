@@ -170,9 +170,9 @@
 .land-int-grid {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  gap: 40px;
+  gap: 24px;
   align-items: center;
-  max-width: 960px;
+  max-width: 920px;
   margin: 0 auto;
   padding: 40px 0;
 }
@@ -315,12 +315,13 @@
   }
 
   .land-int-grid {
-    gap: 24px;
+    gap: 16px;
     padding: 24px 0;
   }
 
   .land-int-card {
-    max-width: 240px;
+    max-width: 220px;
+    padding: 10px 14px;
   }
 }
 
