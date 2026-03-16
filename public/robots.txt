@@ -1,9 +1,11 @@
 User-agent: *
-Allow: /integrations
 Allow: /
-Disallow: /integration
+
+# Authenticated pages — block from crawling
 Disallow: /dashboard
 Disallow: /generate
 Disallow: /settings
+Disallow: /verify-otp
+Disallow: /reset-password
 
 Sitemap: https://releaslyy.com/sitemap.xml
