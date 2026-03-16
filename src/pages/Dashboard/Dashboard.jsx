@@ -123,6 +123,8 @@ const Dashboard = () => {
     const [loadingData, setLoadingData] = useState(false);
     const [customPrompt, setCustomPrompt] = useState('');
     const [advancedOpen, setAdvancedOpen] = useState(false);
+    const [audienceOptions, setAudienceOptions] = useState([]);
+    const [audiencesLoading, setAudiencesLoading] = useState(true);
 
     // -- Generate Wizard State --
     const [step, setStep] = useState(1);
@@ -145,6 +147,15 @@ const Dashboard = () => {
     }, [selectedBoard]);
     useEffect(() => { sessionStorage.setItem('devrev_selectedSprints', JSON.stringify(selectedSprints)); }, [selectedSprints]);
     useEffect(() => { sessionStorage.setItem('shared_audience', audience); }, [audience]);
+
+    // --- Fetch Audience Options ---
+    const fetchAudiences = () => {
+        setAudiencesLoading(true);
+        api.get('/audiences')
+            .then(res => { setAudienceOptions(res.data); setAudiencesLoading(false); })
+            .catch(() => { setAudiencesLoading(false); toast.error('Failed to load audience types'); });
+    };
+    useEffect(() => { fetchAudiences(); }, []);
 
     // --- Initialization ---
     useEffect(() => {
@@ -653,13 +664,14 @@ const Dashboard = () => {
         || (sources.includes('devrev') && devrevSelectedItems.length > 0);
 
     const wizardSteps = [
-        { n: 1, label: 'Select Source' },
-        { n: 2, label: 'Pick Changes' },
-        { n: 3, label: 'Configure', disabled: !hasDataSelected },
+        { n: 1, label: 'Audience' },
+        { n: 2, label: 'Select Source' },
+        { n: 3, label: 'Pick Changes' },
+        { n: 4, label: 'Configure', disabled: !hasDataSelected },
     ];
 
     const handleStepClick = (n) => {
-        if (n === 3 && !hasDataSelected) return;
+        if (n === 4 && !hasDataSelected) return;
         setStep(n);
     };
 
@@ -733,7 +745,7 @@ const Dashboard = () => {
                                                             </span>
                                                         )}
                                                         {note.published && <span className="dash-published-badge"><Check size={10} /> Published</span>}
-                                                        <span>{note.audience || 'Product'}</span>
+                                                        <span>{audienceOptions.find(a => a.id === note.audience)?.label || note.audience || 'Product'}</span>
                                                     </div>
                                                 </div>
                                                 <div className="dash-note-date-v2">
@@ -858,8 +870,49 @@ const Dashboard = () => {
                     <div className="page-content">
                         <StepIndicator steps={wizardSteps} currentStep={step} onStepClick={handleStepClick} />
 
-                        {/* Step 1: Select Source */}
+                        {/* Step 1: Audience */}
                         {step === 1 && (
+                            <div className="fu d1">
+                                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: 6 }}>Who are these release notes for?</h3>
+                                <p style={{ fontSize: '0.9375rem', color: 'var(--muted)', marginBottom: 20 }}>Select your target audience to tailor the output format and detail level.</p>
+                                {audiencesLoading ? (
+                                    <div className="audience-grid">
+                                        {[...Array(6)].map((_, i) => <div key={i} className="audience-skeleton" />)}
+                                    </div>
+                                ) : audienceOptions.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                                        <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)', margin: '0 0 6px' }}>Failed to load audience types</p>
+                                        <p style={{ fontSize: '0.9375rem', color: 'var(--muted)', margin: '0 0 18px', lineHeight: 1.5 }}>
+                                            Please check your connection and try again.
+                                        </p>
+                                        <button className="btn btn-primary btn-sm" onClick={fetchAudiences}>
+                                            <RefreshCw size={14} /> Retry
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="audience-grid">
+                                            {audienceOptions.map(opt => (
+                                                <div
+                                                    key={opt.id}
+                                                    className={`audience-card${audience === opt.id ? ' selected' : ''}`}
+                                                    onClick={() => setAudience(opt.id)}
+                                                >
+                                                    <h4>{opt.label}</h4>
+                                                    <p>{opt.description}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button className="btn btn-primary" onClick={() => setStep(2)}>
+                                            Continue {ic.arr}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Step 2: Select Source */}
+                        {step === 2 && (
                             <div className="fu d1">
                                 <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: 6 }}>Choose your data source</h3>
                                 <p style={{ fontSize: '0.9375rem', color: 'var(--muted)', marginBottom: 20 }}>Select one or more integrations to pull changes from.</p>
@@ -917,7 +970,7 @@ const Dashboard = () => {
                                                 );
                                             })}
                                         </div>
-                                        <button className="btn btn-primary" onClick={() => setStep(2)} disabled={sources.length === 0} style={{ opacity: sources.length === 0 ? 0.5 : 1 }}>
+                                        <button className="btn btn-primary" onClick={() => setStep(3)} disabled={sources.length === 0} style={{ opacity: sources.length === 0 ? 0.5 : 1 }}>
                                             Continue with {sources.length} source{sources.length !== 1 ? 's' : ''} {ic.arr}
                                         </button>
                                     </>
@@ -925,8 +978,8 @@ const Dashboard = () => {
                             </div>
                         )}
 
-                        {/* Step 2: Pick Changes */}
-                        {step === 2 && (
+                        {/* Step 3: Pick Changes */}
+                        {step === 3 && (
                             <div className="fu d1">
                                 {/* Source tabs when multiple sources selected */}
                                 {sources.length > 1 && (
@@ -969,11 +1022,11 @@ const Dashboard = () => {
                                         selectedCommits={selectedCommits}
                                         onToggleCommit={handleToggleCommit}
                                         onToggleAll={handleToggleAllCommits}
-                                        onGenerate={() => setStep(3)}
+                                        onGenerate={() => setStep(4)}
                                         loading={loadingData || loading}
                                         dateRange={dateRange}
                                         setDateRange={setDateRange}
-                                        onBack={() => setStep(1)}
+                                        onBack={() => setStep(2)}
                                         showBackButton
                                     />
                                 ) : (sources.length === 1 ? sources[0] : sourceTab) === 'jira' && sources.includes('jira') ? (
@@ -1193,10 +1246,10 @@ const Dashboard = () => {
                                             )}
                                         </div>
                                         <div className="selector-footer-v2">
-                                            <button className="btn btn-secondary" onClick={() => setStep(1)}>{ic.back} Back</button>
+                                            <button className="btn btn-secondary" onClick={() => setStep(2)}>{ic.back} Back</button>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                                 <span style={{ fontSize: '0.875rem', color: 'var(--muted)' }}>{jiraSelectedIssues.length} selected</span>
-                                                <button className="btn btn-primary" onClick={() => setStep(3)} disabled={jiraSelectedIssues.length === 0}>
+                                                <button className="btn btn-primary" onClick={() => setStep(4)} disabled={jiraSelectedIssues.length === 0}>
                                                     Continue {ic.arr}
                                                 </button>
                                             </div>
@@ -1313,10 +1366,10 @@ const Dashboard = () => {
                                             </div>
                                         </div>
                                         <div className="selector-footer-v2">
-                                            <button className="btn btn-secondary" onClick={() => setStep(1)}>{ic.back} Back</button>
+                                            <button className="btn btn-secondary" onClick={() => setStep(2)}>{ic.back} Back</button>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                                 <span style={{ fontSize: '0.875rem', color: 'var(--muted)' }}>{devrevSelectedItems.length} selected</span>
-                                                <button className="btn btn-primary" onClick={() => setStep(3)} disabled={devrevSelectedItems.length === 0}>
+                                                <button className="btn btn-primary" onClick={() => setStep(4)} disabled={devrevSelectedItems.length === 0}>
                                                     Continue {ic.arr}
                                                 </button>
                                             </div>
@@ -1326,8 +1379,8 @@ const Dashboard = () => {
                             </div>
                         )}
 
-                        {/* Step 3: Configure */}
-                        {step === 3 && (
+                        {/* Step 4: Configure */}
+                        {step === 4 && (
                             <div className="fu d1">
                                 <div className="config-layout">
                                     {/* Left: Config Form (60%) */}
@@ -1342,19 +1395,6 @@ const Dashboard = () => {
                                                     onChange={e => setReleaseTitle(e.target.value)}
                                                     placeholder={`${sources.map(s => s === 'github' ? 'GitHub' : s === 'jira' ? 'Jira' : 'DevRev').join(' + ')} Release Notes - ${new Date().toLocaleDateString()}`}
                                                     className="gen-config-input"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="gen-config-label">Audience</label>
-                                                <SearchDropdown
-                                                    options={[
-                                                        { id: 'product', label: 'Product Team' },
-                                                        { id: 'qa', label: 'QA / Testing' },
-                                                        { id: 'stakeholder', label: 'Stakeholders' },
-                                                    ]}
-                                                    value={audience}
-                                                    onChange={(id) => setAudience(id)}
-                                                    placeholder="Select audience..."
                                                 />
                                             </div>
                                             <div>
@@ -1406,7 +1446,7 @@ const Dashboard = () => {
                                         </div>
 
                                         <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
-                                            <button className="btn btn-secondary" onClick={() => setStep(2)}>{ic.back} Back</button>
+                                            <button className="btn btn-secondary" onClick={() => setStep(3)}>{ic.back} Back</button>
                                             <button className="btn btn-primary gen-generate-btn" onClick={handleGenerate} disabled={loading}>
                                                 {loading ? (
                                                     <><RefreshCw size={14} className="spin" /> Generating...</>
@@ -1448,7 +1488,7 @@ const Dashboard = () => {
                                                 )}
                                                 <div className="config-summary-row">
                                                     <span className="config-summary-label">Audience</span>
-                                                    <span className="config-summary-value">{audience === 'product' ? 'Product Team' : audience === 'qa' ? 'QA / Testing' : 'Stakeholders'}</span>
+                                                    <span className="config-summary-value">{audienceOptions.find(a => a.id === audience)?.label || audience}</span>
                                                 </div>
                                                 <div className="config-summary-row">
                                                     <span className="config-summary-label">Tone</span>
