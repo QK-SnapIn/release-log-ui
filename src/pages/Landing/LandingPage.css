@@ -170,9 +170,9 @@
 .land-int-grid {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  gap: 32;
+  gap: 40px;
   align-items: center;
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 40px 0;
 }
@@ -180,15 +180,80 @@
 .land-int-col-left {
   display: flex;
   flex-direction: column;
-  gap: 10;
+  gap: 10px;
   align-items: flex-end;
 }
 
 .land-int-col-right {
   display: flex;
   flex-direction: column;
-  gap: 10;
+  gap: 10px;
   align-items: flex-start;
+}
+
+.land-int-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.land-int-hub {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Integration card — glass style */
+.land-int-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--land-border);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  max-width: 280px;
+  animation: land-float 6s ease-in-out infinite;
+}
+
+.land-int-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.land-int-card--active {
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Integration card icon */
+.land-int-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid;
+  transition: transform 0.3s ease;
+}
+
+.land-int-card:hover .land-int-icon {
+  transform: rotate(6deg);
+}
+
+@keyframes land-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
 /* ── Pricing Page ── */
@@ -250,8 +315,12 @@
   }
 
   .land-int-grid {
-    gap: 20;
+    gap: 24px;
     padding: 24px 0;
+  }
+
+  .land-int-card {
+    max-width: 240px;
   }
 }
 
@@ -358,7 +427,7 @@
   }
 
   .land-int-col-left {
-    align-items: stretch !important;
+    align-items: center !important;
     order: 1;
   }
 
@@ -366,12 +435,16 @@
     justify-content: flex-start !important;
   }
 
+  .land-int-card {
+    max-width: 100% !important;
+  }
+
   .land-int-center {
     order: 0;
   }
 
   .land-int-col-right {
-    align-items: stretch !important;
+    align-items: center !important;
     order: 2;
   }
 

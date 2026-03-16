@@ -1,8 +1,51 @@
+import { useNavigate } from "react-router-dom";
 import FadeIn from "./FadeIn";
 import { SOURCES, DESTINATIONS } from "./data";
 import logoR from "../../assets/logos/releaslyy-favicon.svg";
 
+function SourceCard({ s, i }) {
+  return (
+    <FadeIn delay={0.2 + i * 0.08} style={{ width: "100%" }}>
+      <div className={`land-int-card${i === 0 ? ' land-int-card--active' : ''}`}
+        style={{ justifyContent: "flex-end", animationDelay: `${i * 0.2}s` }}
+      >
+        <div style={{ textAlign: "right", flex: 1 }}>
+          <span style={{ display: "block", fontSize: 14, fontWeight: 600, color: "var(--land-text)" }}>{s.name}</span>
+          {i === 0 && (
+            <span style={{ fontSize: 10, fontWeight: 700, color: "var(--land-accent)", textTransform: "uppercase", letterSpacing: ".06em" }}>Active Stream</span>
+          )}
+        </div>
+        <div className="land-int-icon" style={{ background: s.bg, borderColor: s.color + '30' }}>
+          {s.logo ? <img src={s.logo} alt={s.name} style={{ width: 22, height: 22, objectFit: "contain" }} /> : <span style={{ fontSize: 12, fontWeight: 800, color: s.color }}>{s.abbr}</span>}
+        </div>
+      </div>
+    </FadeIn>
+  );
+}
+
+function DestCard({ d, i }) {
+  return (
+    <FadeIn delay={0.2 + i * 0.08} style={{ width: "100%" }}>
+      <div className={`land-int-card${i === 0 ? ' land-int-card--active' : ''}`}
+        style={{ animationDelay: `${i * 0.2 + 0.1}s` }}
+      >
+        <div className="land-int-icon" style={{ background: d.bg, borderColor: d.color + '30' }}>
+          {d.logo ? <img src={d.logo} alt={d.name} style={{ width: 22, height: 22, objectFit: "contain" }} /> : <span style={{ fontSize: 12, fontWeight: 800, color: d.color }}>{d.abbr}</span>}
+        </div>
+        <div style={{ flex: 1 }}>
+          <span style={{ display: "block", fontSize: 14, fontWeight: 600, color: "var(--land-text)" }}>{d.name}</span>
+          {i === 0 && (
+            <span style={{ fontSize: 10, fontWeight: 700, color: "var(--land-accent2)", textTransform: "uppercase", letterSpacing: ".06em" }}>Sync Active</span>
+          )}
+        </div>
+      </div>
+    </FadeIn>
+  );
+}
+
 export default function Integrations() {
+  const navigate = useNavigate();
+
   return (
     <section className="land-sec" id="integrations" style={{ position: "relative", overflow: "hidden" }}>
       <div className="land-orb" style={{ width: 500, height: 500, opacity: .05, background: "radial-gradient(circle,rgba(14,165,233,.4),transparent)", top: "50%", left: "50%", marginLeft: -250, marginTop: -250 }} />
@@ -22,65 +65,74 @@ export default function Integrations() {
 
         <FadeIn delay={0.15}>
           <div className="land-int-grid">
+            {/* Left Column — Collect From */}
             <div className="land-int-col-left">
-              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--land-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4, textAlign: "right", width: "100%" }}>Collect From</div>
-              {SOURCES.map((s, i) => (
-                <FadeIn key={s.name} delay={0.2 + i * 0.06} style={{ width: "100%" }}>
-                  <div style={{
-                    display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10,
-                    background: "var(--land-card)", border: "1px solid var(--land-border)", justifyContent: "flex-end",
-                  }}>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: "var(--land-text)" }}>{s.name}</span>
-                    <div style={{ width: 28, height: 28, borderRadius: 7, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, color: s.color, flexShrink: 0 }}>
-                      {s.logo ? <img src={s.logo} alt={s.name} style={{ width: 18, height: 18, objectFit: "contain" }} /> : s.abbr}
-                    </div>
-                  </div>
-                </FadeIn>
-              ))}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end", width: "100%", marginBottom: 8 }}>
+                <div style={{ width: 6, height: 6, borderRadius: 6, background: "var(--land-accent)", animation: "land-pulse 2s ease-in-out infinite" }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--land-muted)", textTransform: "uppercase", letterSpacing: ".15em" }}>Collect From</span>
+              </div>
+              {SOURCES.map((s, i) => <SourceCard key={s.name} s={s} i={i} />)}
             </div>
 
+            {/* Center — Releaslyy AI Hub */}
             <FadeIn delay={0.3}>
-              <div className="land-int-center" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-                <div style={{ position: "relative", width: 100, height: 100 }}>
-                  <svg width="100" height="100" viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, animation: "land-spin 20s linear infinite" }}>
-                    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(24,24,27,.08)" strokeWidth="1.5" strokeDasharray="8 6" />
+              <div className="land-int-center">
+                <div className="land-int-hub">
+                  {/* Spinning dashed orbit */}
+                  <svg width="120" height="120" viewBox="0 0 120 120" style={{ position: "absolute", inset: -10, animation: "land-spin 20s linear infinite" }}>
+                    <circle cx="60" cy="60" r="56" fill="none" stroke="rgba(99,102,241,.15)" strokeWidth="1.5" strokeDasharray="8 6" />
                   </svg>
+                  {/* Orbiting dot */}
+                  <svg width="120" height="120" viewBox="0 0 120 120" style={{ position: "absolute", inset: -10, animation: "land-spin 8s linear infinite" }}>
+                    <circle cx="60" cy="4" r="4" fill="var(--land-accent)" opacity="0.6" />
+                  </svg>
+                  {/* Glow */}
+                  <div style={{ position: "absolute", inset: -20, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,.15), transparent)", animation: "land-pulse 4s ease-in-out infinite", pointerEvents: "none" }} />
+                  {/* Inner circle */}
                   <div style={{
-                    position: "absolute", inset: 12, borderRadius: "50%",
-                    background: "linear-gradient(135deg,rgba(24,24,27,.04),rgba(99,102,241,.06))",
-                    border: "1px solid rgba(24,24,27,.08)",
+                    width: 80, height: 80, borderRadius: "50%",
+                    background: "var(--land-card)", border: "2px solid var(--land-border)",
                     display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: "0 0 40px rgba(99,102,241,.15)",
+                    position: "relative", zIndex: 2,
                   }}>
-                    <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg,var(--land-primary),var(--land-accent))", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <img src={logoR} alt="Releaslyy" style={{ width: 18, height: 18, objectFit: "contain" }} />
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 12,
+                      background: "linear-gradient(135deg,var(--land-primary),var(--land-accent))",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      boxShadow: "0 4px 20px rgba(99,102,241,.3)",
+                    }}>
+                      <img src={logoR} alt="Releaslyy" style={{ width: 22, height: 22, objectFit: "contain" }} />
                     </div>
                   </div>
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: "-.01em", color: "var(--land-text)" }}>Releaslyy AI</div>
+                <div style={{ textAlign: "center", marginTop: 20 }}>
+                  <div style={{
+                    fontSize: 18, fontWeight: 800, letterSpacing: "-.02em",
+                    background: "linear-gradient(135deg, var(--land-accent), var(--land-accent2))",
+                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                  }}>Releaslyy AI</div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 4 }}>
+                    <div style={{ width: 5, height: 5, borderRadius: 5, background: "var(--land-teal)", animation: "land-pulse 2s ease-in-out infinite" }} />
+                    <span style={{ fontSize: 12, fontWeight: 500, color: "var(--land-muted)" }}>Processing releases</span>
+                  </div>
+                </div>
               </div>
             </FadeIn>
 
+            {/* Right Column — Publish To */}
             <div className="land-int-col-right">
-              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--land-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4, width: "100%" }}>Publish To</div>
-              {DESTINATIONS.map((d, i) => (
-                <FadeIn key={d.name} delay={0.2 + i * 0.06} style={{ width: "100%" }}>
-                  <div style={{
-                    display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10,
-                    background: "var(--land-card)", border: "1px solid var(--land-border)",
-                  }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 7, background: d.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, color: d.color, flexShrink: 0 }}>
-                      {d.logo ? <img src={d.logo} alt={d.name} style={{ width: 18, height: 18, objectFit: "contain" }} /> : d.abbr}
-                    </div>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: "var(--land-text)" }}>{d.name}</span>
-                  </div>
-                </FadeIn>
-              ))}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", marginBottom: 8 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--land-muted)", textTransform: "uppercase", letterSpacing: ".15em" }}>Publish To</span>
+                <div style={{ width: 6, height: 6, borderRadius: 6, background: "var(--land-accent2)", animation: "land-pulse 2s ease-in-out infinite" }} />
+              </div>
+              {DESTINATIONS.map((d, i) => <DestCard key={d.name} d={d} i={i} />)}
             </div>
           </div>
         </FadeIn>
 
         <FadeIn delay={0.5}>
-          <p style={{ textAlign: "center", fontSize: 14, color: "var(--land-muted)", marginTop: 24 }}>
+          <p style={{ textAlign: "center", fontSize: 14, color: "var(--land-muted)", marginTop: 32 }}>
             More integrations coming soon — Slack, Linear, Notion, and more.{" "}
             <a href="/integrations#request" onClick={(e) => {
               e.preventDefault();
