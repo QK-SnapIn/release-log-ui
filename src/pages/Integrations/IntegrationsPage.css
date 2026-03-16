@@ -1,0 +1,115 @@
+/* ─── Integrations Hub Page Styles ─── */
+
+/* Integration cards grid */
+.integ-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Individual integration card */
+.integ-hub-card {
+  padding: 28px;
+  border-radius: 14px;
+  background: var(--land-card);
+  border: 1px solid var(--land-border);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.integ-hub-card:hover {
+  border-color: #d0d0d6;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.integ-hub-card--dashed {
+  border-style: dashed;
+  border-color: var(--land-border);
+  background: transparent;
+}
+
+.integ-hub-card--dashed:hover {
+  border-color: #b0b0b8;
+  box-shadow: none;
+}
+
+/* Status badges */
+.integ-hub-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.integ-hub-badge--available {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--land-teal);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.integ-hub-badge--soon {
+  background: rgba(113, 113, 122, 0.08);
+  color: var(--land-muted);
+  border: 1px solid var(--land-border);
+}
+
+/* How integrations work steps */
+.integ-hub-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  position: relative;
+}
+
+/* Hero gradient */
+.integ-hub-hero-gradient {
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.07), transparent);
+}
+
+/* Step number watermark */
+.integ-hub-step-num {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1;
+  font-family: var(--land-mono);
+  color: rgba(0, 0, 0, 0.03);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .integ-hub-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .integ-hub-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .integ-hub-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .integ-hub-card {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .integ-hub-step-num {
+    font-size: 48px;
+  }
+}

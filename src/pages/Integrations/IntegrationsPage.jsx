@@ -1,0 +1,428 @@
+import { useNavigate } from 'react-router-dom';
+import { Sparkles, Hash, Plus, Cable, Send, ArrowRight } from 'lucide-react';
+import Nav from '../../components/landing/Nav';
+import Footer from '../../components/landing/Footer';
+import FadeIn from '../../components/landing/FadeIn';
+import SEO from '../../components/SEO';
+import githubLogo from '../../assets/github.png';
+import jiraLogo from '../../assets/jira_logo.webp';
+import devrevLogo from '../../assets/devrev-logo.webp';
+import zohoLogo from '../../assets/Zoho-logo.webp';
+import '../Landing/LandingPage.css';
+import './IntegrationsPage.css';
+
+const INTEGRATIONS = [
+  {
+    id: 'github',
+    name: 'GitHub',
+    logo: githubLogo,
+    logoAlt: 'GitHub',
+    description: 'Pull commits, PRs, and tags directly from GitHub. Generate release notes and publish back to GitHub Releases.',
+    status: 'available',
+    href: '/docs',
+  },
+  {
+    id: 'jira',
+    name: 'Jira',
+    logo: jiraLogo,
+    logoAlt: 'Jira',
+    description: 'Connect Jira sprints and issues. Generate release notes from your sprint backlog and publish to Jira releases.',
+    status: 'available',
+    href: '/integrations/jira',
+  },
+  {
+    id: 'devrev',
+    name: 'DevRev',
+    logo: devrevLogo,
+    logoAlt: 'DevRev',
+    description: 'Sync DevRev work items and sprints. AI generates release notes and publishes back to DevRev.',
+    status: 'available',
+    href: '/integrations/devrev',
+  },
+  {
+    id: 'slack',
+    name: 'Slack',
+    logo: null,
+    logoAlt: 'Slack',
+    description: 'Auto-publish release notes to Slack channels. Rich formatting, thread support, and team mentions.',
+    status: 'soon',
+    href: '/integrations/slack',
+  },
+  {
+    id: 'zoho',
+    name: 'Zoho Sprints',
+    logo: zohoLogo,
+    logoAlt: 'Zoho Sprints',
+    description: 'Connect Zoho Sprints to generate release notes from your sprint items and backlog.',
+    status: 'soon',
+    href: null,
+  },
+  {
+    id: 'more',
+    name: 'More Integrations',
+    logo: null,
+    logoAlt: null,
+    description: 'GitLab, Bitbucket, Linear, Notion — more integrations coming soon. Request yours on our support page.',
+    status: 'placeholder',
+    href: '/support',
+  },
+];
+
+const HOW_IT_WORKS = [
+  {
+    num: '01',
+    icon: <Cable size={20} />,
+    title: 'Connect',
+    desc: 'Link your GitHub, Jira, DevRev, or Slack workspace with one click. OAuth-based, secure, revocable.',
+    color: 'var(--land-sky)',
+  },
+  {
+    num: '02',
+    icon: <Sparkles size={20} />,
+    title: 'Generate',
+    desc: 'Select commits, issues, or sprint items. AI generates release notes in 6 audience formats.',
+    color: 'var(--land-accent)',
+  },
+  {
+    num: '03',
+    icon: <Send size={20} />,
+    title: 'Publish',
+    desc: 'Push notes back to GitHub Releases, Jira, DevRev, or Slack channels automatically.',
+    color: 'var(--land-teal)',
+  },
+];
+
+function IntegrationCard({ integration, index, navigate }) {
+  const isPlaceholder = integration.status === 'placeholder';
+  const isAvailable = integration.status === 'available';
+  const isSoon = integration.status === 'soon';
+
+  const handleLearnMore = () => {
+    if (!integration.href) return;
+    navigate(integration.href);
+  };
+
+  return (
+    <FadeIn delay={index * 0.07}>
+      <div
+        className={`integ-hub-card${isPlaceholder ? ' integ-hub-card--dashed' : ''}`}
+        style={{ cursor: integration.href ? 'pointer' : 'default' }}
+        onClick={integration.href ? handleLearnMore : undefined}
+      >
+        {/* Logo / Icon */}
+        <div style={{ marginBottom: 16 }}>
+          {isPlaceholder ? (
+            <div style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: 'rgba(113,113,122,.06)',
+              border: '1px dashed var(--land-border)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--land-muted)',
+            }}>
+              <Plus size={18} />
+            </div>
+          ) : integration.logo ? (
+            <img
+              src={integration.logo}
+              alt={integration.logoAlt}
+              style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 8 }}
+            />
+          ) : (
+            <div style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: 'rgba(16,185,129,.08)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--land-teal)',
+            }}>
+              <Hash size={20} />
+            </div>
+          )}
+        </div>
+
+        {/* Name + badge row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-.02em', color: 'var(--land-text)' }}>
+            {integration.name}
+          </span>
+          {isAvailable && (
+            <span className="integ-hub-badge integ-hub-badge--available">
+              <span style={{ width: 5, height: 5, borderRadius: 5, background: 'var(--land-teal)', display: 'inline-block' }} />
+              Available
+            </span>
+          )}
+          {isSoon && (
+            <span className="integ-hub-badge integ-hub-badge--soon">
+              Coming Soon
+            </span>
+          )}
+        </div>
+
+        {/* Description */}
+        <p style={{
+          fontSize: 14, color: 'var(--land-muted)', lineHeight: 1.65,
+          flex: 1, marginBottom: integration.href ? 20 : 0,
+        }}>
+          {integration.description}
+        </p>
+
+        {/* Learn more link */}
+        {integration.href && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            fontSize: 13, fontWeight: 600,
+            color: isPlaceholder ? 'var(--land-muted)' : 'var(--land-accent)',
+            marginTop: 'auto',
+          }}>
+            {isPlaceholder ? 'Request an integration' : 'Learn more'}
+            <ArrowRight size={13} />
+          </div>
+        )}
+      </div>
+    </FadeIn>
+  );
+}
+
+export default function IntegrationsPage() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="landing-root">
+      <SEO
+        title="Integrations — GitHub, Jira, DevRev, Slack"
+        description="Connect GitHub, Jira, DevRev, and Slack to Releaslyy. Pull commits and issues, generate AI release notes, and publish back automatically. Free to start."
+        keywords="releaslyy integrations, github integration, jira integration, devrev integration, slack release notes, release notes integrations, changelog integrations, connect github jira devrev"
+        canonical="https://releaslyy.com/integrations"
+      />
+      <div className="land-noise" />
+      <Nav />
+
+      {/* ── Hero ── */}
+      <section
+        className="land-sec land-hero-sec integ-hub-hero-gradient"
+        style={{ paddingTop: 160, paddingBottom: 60, textAlign: 'center', overflow: 'hidden' }}
+      >
+        <div className="land-orb" style={{
+          width: 600, height: 600, opacity: 0.07,
+          background: 'radial-gradient(circle,rgba(99,102,241,.5),transparent)',
+          top: -100, left: '50%', marginLeft: -300,
+          animation: 'land-pulse 6s ease-in-out infinite',
+        }} />
+        <div className="land-orb" style={{
+          width: 400, height: 400, opacity: 0.05,
+          background: 'radial-gradient(circle,rgba(16,185,129,.4),transparent)',
+          top: 200, right: -100,
+          animation: 'land-pulse 8s ease-in-out infinite 2s',
+        }} />
+
+        <div className="land-con" style={{ position: 'relative', zIndex: 2 }}>
+          <FadeIn>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '6px 16px', borderRadius: 100,
+              background: 'rgba(99,102,241,.06)', border: '1px solid rgba(99,102,241,.2)',
+              fontSize: 13, color: 'var(--land-accent)', fontWeight: 500, marginBottom: 32,
+            }}>
+              <Sparkles size={14} />
+              Integrations
+            </div>
+          </FadeIn>
+
+          <FadeIn delay={0.1}>
+            <h1 style={{
+              fontSize: 'clamp(36px, 5.5vw, 68px)', fontWeight: 700, lineHeight: 1.08,
+              letterSpacing: '-.035em', maxWidth: 820, margin: '0 auto 24px',
+              color: 'var(--land-text)',
+            }}>
+              Connect your tools,{' '}
+              <span style={{
+                fontFamily: 'var(--land-serif)', fontStyle: 'italic', fontWeight: 400,
+                background: 'linear-gradient(135deg, var(--land-accent), var(--land-teal))',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              }}>
+                automate
+              </span>
+              {' '}your releases
+            </h1>
+          </FadeIn>
+
+          <FadeIn delay={0.2}>
+            <p
+              className="land-hero-subtitle"
+              style={{ fontSize: 18, color: 'var(--land-muted)', maxWidth: 580, margin: '0 auto 40px', lineHeight: 1.65 }}
+            >
+              Releaslyy integrates with the tools your team already uses. Pull data, generate AI release notes, and publish back — all in one flow.
+            </p>
+          </FadeIn>
+
+          <FadeIn delay={0.3}>
+            <button onClick={() => navigate('/signup')} className="land-btn land-btn-p">
+              Get started for free
+              <ArrowRight size={16} />
+            </button>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ── Integration Cards ── */}
+      <section className="land-sec" style={{ paddingTop: 40 }}>
+        <div className="land-con">
+          <FadeIn>
+            <div style={{ textAlign: 'center', marginBottom: 56 }}>
+              <span style={{
+                fontSize: 12, fontWeight: 600, color: 'var(--land-accent)',
+                textTransform: 'uppercase', letterSpacing: '.12em',
+              }}>
+                All Platforms
+              </span>
+              <h2 style={{
+                fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700,
+                letterSpacing: '-.03em', marginTop: 12, color: 'var(--land-text)',
+              }}>
+                Every tool your team{' '}
+                <span style={{ fontFamily: 'var(--land-serif)', fontStyle: 'italic', fontWeight: 400 }}>
+                  already uses
+                </span>
+              </h2>
+              <p style={{
+                fontSize: 16, color: 'var(--land-muted)', maxWidth: 520,
+                margin: '16px auto 0', lineHeight: 1.6,
+              }}>
+                Connect one or combine multiple sources. Releaslyy unifies everything into a single release.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="integ-hub-grid">
+            {INTEGRATIONS.map((integration, i) => (
+              <IntegrationCard
+                key={integration.id}
+                integration={integration}
+                index={i}
+                navigate={navigate}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── How Integrations Work ── */}
+      <section className="land-sec" style={{ background: 'var(--land-surface)', borderRadius: 0 }}>
+        <div className="land-con">
+          <FadeIn>
+            <div style={{ textAlign: 'center', marginBottom: 56 }}>
+              <span style={{
+                fontSize: 12, fontWeight: 600, color: 'var(--land-sky)',
+                textTransform: 'uppercase', letterSpacing: '.12em',
+              }}>
+                How it works
+              </span>
+              <h2 style={{
+                fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700,
+                letterSpacing: '-.03em', marginTop: 12, color: 'var(--land-text)',
+              }}>
+                Three steps to{' '}
+                <span style={{ fontFamily: 'var(--land-serif)', fontStyle: 'italic', fontWeight: 400 }}>
+                  effortless
+                </span>
+                {' '}releases
+              </h2>
+            </div>
+          </FadeIn>
+
+          <div className="integ-hub-steps">
+            {HOW_IT_WORKS.map((step, i) => (
+              <FadeIn key={step.num} delay={i * 0.12}>
+                <div style={{
+                  padding: 32, borderRadius: 14,
+                  background: 'var(--land-card)', border: '1px solid var(--land-border)',
+                  position: 'relative', overflow: 'hidden', height: '100%',
+                  transition: 'all .3s ease',
+                }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#d0d0d6';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,.06)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--land-border)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <div className="integ-hub-step-num">{step.num}</div>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 10,
+                    background: step.color + '12',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: step.color, marginBottom: 20,
+                  }}>
+                    {step.icon}
+                  </div>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
+                  }}>
+                    <span style={{
+                      fontFamily: 'var(--land-mono)', fontSize: 11, fontWeight: 700,
+                      color: step.color, textTransform: 'uppercase', letterSpacing: '.08em',
+                    }}>
+                      {step.num}
+                    </span>
+                    <h3 style={{
+                      fontSize: 18, fontWeight: 600, letterSpacing: '-.02em',
+                      color: 'var(--land-text)',
+                    }}>
+                      {step.title}
+                    </h3>
+                  </div>
+                  <p style={{ fontSize: 14, color: 'var(--land-muted)', lineHeight: 1.65 }}>
+                    {step.desc}
+                  </p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA Section ── */}
+      <section className="land-sec">
+        <div className="land-con">
+          <FadeIn>
+            <div className="land-cta-box" style={{
+              textAlign: 'center', padding: '64px 32px', borderRadius: 20,
+              position: 'relative', overflow: 'hidden',
+              background: 'linear-gradient(135deg,rgba(24,24,27,.02) 0%,rgba(99,102,241,.04) 100%)',
+              border: '1px solid rgba(24,24,27,.08)',
+            }}>
+              <div className="land-orb" style={{
+                width: 400, height: 400, opacity: 0.06,
+                background: 'radial-gradient(circle,rgba(99,102,241,.4),transparent)',
+                top: -150, left: '50%', marginLeft: -200,
+              }} />
+              <div style={{ position: 'relative', zIndex: 2 }}>
+                <h2 style={{
+                  fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 700,
+                  letterSpacing: '-.03em', marginBottom: 16, color: 'var(--land-text)',
+                }}>
+                  Stop writing release notes manually
+                </h2>
+                <p style={{
+                  fontSize: 16, color: 'var(--land-muted)', maxWidth: 460,
+                  margin: '0 auto 32px', lineHeight: 1.6,
+                }}>
+                  Connect your tools, let AI do the writing, and publish everywhere — in seconds. Free to start, no credit card required.
+                </p>
+                <button onClick={() => navigate('/signup')} className="land-btn land-btn-p">
+                  Get started for free
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+}

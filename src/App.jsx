@@ -16,6 +16,7 @@ import PrivacyPage from './pages/Privacy/PrivacyPage';
 import TermsPage from './pages/Terms/TermsPage';
 import SupportPage from './pages/Support/SupportPage';
 import IntegrationLanding from './pages/IntegrationLanding/IntegrationLanding';
+import IntegrationsPage from './pages/Integrations/IntegrationsPage';
 import Signup from './pages/Signup/Signup';
 import VerifyOtp from './pages/VerifyOtp/VerifyOtp';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
@@ -73,6 +74,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/integrations" element={<IntegrationsPage />} />
         <Route path="/integrations/devrev" element={<IntegrationLanding />} />
 
         {/* Authenticated routes — sidebar layout */}
