@@ -378,15 +378,20 @@ export default function PlansBilling() {
             <div className="section-desc">Your billing history</div>
             <div className="s-table-wrap">
               <table>
-                <thead><tr><th>Date</th><th>Amount</th><th>Status</th><th></th></tr></thead>
-                <tbody>{invoices.map((inv, i) => (
-                  <tr key={i}>
-                    <td>{new Date(inv.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                    <td style={{ fontWeight: 500 }}>${Number(inv.amount).toFixed(2)}</td>
-                    <td><span className={`s-badge ${inv.status === 'active' ? 's-badge-green' : 's-badge-red'}`}>{inv.status === 'active' ? 'Paid' : inv.status}</span></td>
-                    <td>{inv.invoice_link && <a href={inv.invoice_link} target="_blank" rel="noreferrer"><button className="btn btn-icon"><Download /></button></a>}</td>
-                  </tr>
-                ))}</tbody>
+                <thead><tr><th>Date</th><th>Plan</th><th>Billing</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody>{invoices.map((inv, i) => {
+                  const sym = inv.currency === 'INR' ? '₹' : '$';
+                  const amount = (Number(inv.amount) / 100).toFixed(2);
+                  return (
+                    <tr key={i}>
+                      <td style={{ whiteSpace: 'nowrap' }}>{new Date(inv.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                      <td style={{ fontWeight: 500, textTransform: 'capitalize' }}>{inv.plan_slug || '-'}</td>
+                      <td style={{ textTransform: 'capitalize' }}>{inv.billing_interval || '-'}</td>
+                      <td style={{ fontWeight: 500, fontFamily: 'var(--mono)', fontSize: 12 }}>{sym}{amount}</td>
+                      <td><span className={`s-badge ${inv.status === 'paid' ? 's-badge-green' : 's-badge-red'}`}>{inv.status}</span></td>
+                    </tr>
+                  );
+                })}</tbody>
               </table>
             </div>
           </div>
