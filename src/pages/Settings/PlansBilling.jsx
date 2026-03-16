@@ -37,6 +37,7 @@ export default function PlansBilling() {
   const [billingSaving, setBillingSaving] = useState(false);
   const [subscribing, setSubscribing] = useState(null);
   const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [downgradeConfirm, setDowngradeConfirm] = useState(false);
   const [currency, setCurrency] = useState(detectCurrency);
   const [isAnnual, setIsAnnual] = useState(false);
 
@@ -73,6 +74,21 @@ export default function PlansBilling() {
   }, []);
 
   const handleSubscribe = async (selectedPlan) => {
+    // Show downgrade confirmation if switching from paid to free
+    if (selectedPlan.slug === 'free' && currentPlanSlug !== 'free') {
+      setDowngradeConfirm(true);
+      return;
+    }
+    await executeSubscribe(selectedPlan);
+  };
+
+  const handleConfirmDowngrade = async () => {
+    setDowngradeConfirm(false);
+    const freePlan = plans.find(p => p.slug === 'free');
+    if (freePlan) await executeSubscribe(freePlan);
+  };
+
+  const executeSubscribe = async (selectedPlan) => {
     setSubscribing(selectedPlan.slug);
     try {
       if (selectedPlan.slug === 'free') {
@@ -353,6 +369,15 @@ export default function PlansBilling() {
         confirmLabel="Cancel Subscription"
         onConfirm={handleCancelSubscription}
         onCancel={() => setCancelConfirm(false)}
+      />
+
+      <ConfirmDialog
+        open={downgradeConfirm}
+        title="Downgrade to Free?"
+        message="Are you sure you want to downgrade? You will lose access to Pro features immediately. If you want to upgrade again later, you will need to pay again."
+        confirmLabel="Downgrade to Free"
+        onConfirm={handleConfirmDowngrade}
+        onCancel={() => setDowngradeConfirm(false)}
       />
     </div>
   );
