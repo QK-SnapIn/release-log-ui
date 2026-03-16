@@ -21,7 +21,7 @@ const INTEGRATIONS = [
     logoAlt: 'GitHub',
     description: 'Pull commits, PRs, and tags directly from GitHub. Generate release notes and publish back to GitHub Releases.',
     status: 'available',
-    href: '/docs',
+    href: '/integrations/github',
   },
   {
     id: 'jira',
