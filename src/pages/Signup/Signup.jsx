@@ -4,7 +4,6 @@ import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authApi } from '../../lib/api';
 import SEO from '../../components/SEO';
-import logo from '../../assets/logos/releaslyy-logo-main.png';
 import '../Login/Login.css';
 import './Signup.css';
 
@@ -50,10 +49,6 @@ const Signup = () => {
       </button>
 
       <div className="login-left">
-        <div className="brand-logo">
-          <img src={logo} alt="Releaslyy.com Logo" style={{ height: '30px' }} />
-        </div>
-
         <h1 className="login-title">Create your account</h1>
         <p className="login-subtitle">Get started with AI-powered release notes.</p>
 

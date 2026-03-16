@@ -67,7 +67,7 @@
 
 .login-subtitle {
     color: var(--muted);
-    margin-bottom: 40px;
+    margin-bottom: 24px;
     text-align: center;
     font-size: 1.05rem;
     line-height: 1.6;
@@ -112,7 +112,7 @@
 .divider {
     display: flex;
     align-items: center;
-    margin: 24px 0;
+    margin: 16px 0;
     color: var(--muted-light);
     font-size: 0.9rem;
 }
@@ -246,7 +246,7 @@
 .email-login-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .email-login-form .form-field {

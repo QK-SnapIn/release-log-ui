@@ -5,7 +5,6 @@ import toast from 'react-hot-toast';
 import { authApi } from '../../lib/api';
 import SEO from '../../components/SEO';
 import './Login.css';
-import logo from '../../assets/logos/releaslyy-logo-main.png';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -57,10 +56,6 @@ const Login = () => {
             </button>
 
             <div className="login-left">
-                <div className="brand-logo">
-                    <img src={logo} alt="Releaslyy.com Logo" style={{ height: '30px' }} />
-                </div>
-
                 <h1 className="login-title">Welcome!</h1>
                 <p className="login-subtitle">
                     Sign in to continue managing your release notes.
