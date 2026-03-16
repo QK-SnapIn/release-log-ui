@@ -5,7 +5,7 @@ import logoR from "../../assets/logos/releaslyy-favicon.svg";
 
 function SourceCard({ s, i }) {
   return (
-    <FadeIn delay={0.2 + i * 0.08} style={{ width: "100%" }}>
+    <FadeIn delay={0.2 + i * 0.08} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
       <div className={`land-int-card${i === 0 ? ' land-int-card--active' : ''}`}
         style={{ justifyContent: "flex-end", animationDelay: `${i * 0.2}s` }}
       >
