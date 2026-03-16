@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Check, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api, { authApi } from '../../lib/api';
+import { useEntitlements } from '../../hooks/useEntitlements';
 import './Header.css';
 
 const BellIcon = () => (
@@ -129,6 +130,7 @@ const ProjectSwitcher = () => {
 
 const TopBar = ({ title, sub, children }) => {
     const navigate = useNavigate();
+    const { plan } = useEntitlements();
     const [user, setUser] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -196,6 +198,9 @@ const TopBar = ({ title, sub, children }) => {
                             <div className="topbar-avatar">{initial}</div>
                         )}
                         <span className="topbar-username">{firstName}</span>
+                        {plan?.slug && plan.slug !== 'free' && (
+                            <span className="topbar-plan-badge">{plan.slug.toUpperCase()}</span>
+                        )}
                         <svg width="12" height="12" fill="none" viewBox="0 0 12 12" style={{ color: 'var(--m2)', transition: 'transform .2s', transform: dropdownOpen ? 'rotate(180deg)' : 'none' }}>
                             <path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
