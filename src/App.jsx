@@ -16,6 +16,9 @@ import PrivacyPage from './pages/Privacy/PrivacyPage';
 import TermsPage from './pages/Terms/TermsPage';
 import SupportPage from './pages/Support/SupportPage';
 import IntegrationLanding from './pages/IntegrationLanding/IntegrationLanding';
+import JiraLanding from './pages/IntegrationLanding/JiraLanding';
+import GitHubLanding from './pages/IntegrationLanding/GitHubLanding';
+import SlackLanding from './pages/IntegrationLanding/SlackLanding';
 import IntegrationsPage from './pages/Integrations/IntegrationsPage';
 import Signup from './pages/Signup/Signup';
 import VerifyOtp from './pages/VerifyOtp/VerifyOtp';
@@ -76,6 +79,9 @@ function App() {
         <Route path="/support" element={<SupportPage />} />
         <Route path="/integrations" element={<IntegrationsPage />} />
         <Route path="/integrations/devrev" element={<IntegrationLanding />} />
+        <Route path="/integrations/jira" element={<JiraLanding />} />
+        <Route path="/integrations/github" element={<GitHubLanding />} />
+        <Route path="/integrations/slack" element={<SlackLanding />} />
 
         {/* Authenticated routes — sidebar layout */}
         <Route element={<AppShell />}>
