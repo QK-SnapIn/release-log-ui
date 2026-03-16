@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /integration
+Disallow: /generate
+Disallow: /settings
+
+Sitemap: https://releaslyy.com/sitemap.xml
