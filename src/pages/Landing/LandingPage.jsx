@@ -18,6 +18,7 @@ const jsonLd = {
   "operatingSystem": "Web",
   "description": "AI-powered release notes generator. Connect GitHub, Jira, or DevRev and generate polished release notes in seconds.",
   "url": "https://releaslyy.com",
+  "image": "https://releaslyy.com/favicon-192x192.png",
   "offers": {
     "@type": "AggregateOffer",
     "priceCurrency": "INR",
