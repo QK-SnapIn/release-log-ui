@@ -3,6 +3,9 @@ import pg from 'pg';
 const API_URL = 'http://localhost:3000';
 const DB_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/release_notes';
 
+// Track all test emails for cleanup
+const createdTestEmails = [];
+
 // Reusable test credentials — created once, reused across tests
 let testUser = null;
 
@@ -19,7 +22,6 @@ export async function getTestUser() {
 
 /**
  * Sign up and verify a test user via API, then login via browser.
- * Call this in test.beforeAll or the first test of a describe block.
  */
 export async function loginTestUser(page) {
   const user = await getTestUser();
@@ -34,6 +36,8 @@ export async function loginTestUser(page) {
   });
 
   if (signupRes.ok()) {
+    createdTestEmails.push(user.email);
+
     // Get OTP and verify
     const pool = new pg.Pool({ connectionString: DB_URL });
     try {
@@ -59,4 +63,51 @@ export async function loginTestUser(page) {
   await page.waitForURL(/dashboard/, { timeout: 15000 });
 
   return user;
+}
+
+/**
+ * Track an email for cleanup (use in tests that create additional users)
+ */
+export function trackTestEmail(email) {
+  createdTestEmails.push(email);
+}
+
+/**
+ * Clean up all test data from the database.
+ * Call this in globalTeardown or at the end of the test suite.
+ */
+export async function cleanupTestData() {
+  const pool = new pg.Pool({ connectionString: DB_URL });
+  try {
+    // Delete all test users and their cascading data (tokens, release_notes, projects, etc.)
+    // Users table has ON DELETE CASCADE on all related tables
+    if (createdTestEmails.length > 0) {
+      const placeholders = createdTestEmails.map((_, i) => `$${i + 1}`).join(', ');
+      const result = await pool.query(
+        `DELETE FROM users WHERE email IN (${placeholders}) RETURNING email`,
+        createdTestEmails
+      );
+      console.log(`Cleaned up ${result.rowCount} test users: ${result.rows.map(r => r.email).join(', ')}`);
+    }
+
+    // Also clean up any leftover test emails matching the pattern
+    const patternResult = await pool.query(
+      `DELETE FROM users WHERE email LIKE '%@releaslyy-test.com' RETURNING email`
+    );
+    if (patternResult.rowCount > 0) {
+      console.log(`Cleaned up ${patternResult.rowCount} additional test users by pattern`);
+    }
+
+    // Clean up OTPs for test emails
+    await pool.query(`DELETE FROM email_otps WHERE email LIKE '%@releaslyy-test.com'`);
+    await pool.query(`DELETE FROM email_otps WHERE email LIKE '%@test.com'`);
+
+    // Clean up token usage from test users (already cascaded via user delete, but just in case)
+    await pool.query(`DELETE FROM token_usage WHERE user_id NOT IN (SELECT id FROM users)`);
+
+  } catch (err) {
+    console.error('Cleanup failed:', err.message);
+  } finally {
+    await pool.end();
+  }
 }
