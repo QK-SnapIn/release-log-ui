@@ -363,7 +363,13 @@ const GenerateEdit = () => {
                 open={showPublishModal}
                 onClose={(didPublish) => {
                     setShowPublishModal(false);
-                    if (didPublish) setIsPublished(true);
+                    if (didPublish && noteId) {
+                        api.get(`/notes/${noteId}`).then((res) => {
+                            setIsPublished(res.data.note.published);
+                        }).catch(() => {
+                            setIsPublished(true);
+                        });
+                    }
                 }}
                 noteId={noteId}
                 noteTitle={noteTitle}

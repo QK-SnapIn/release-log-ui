@@ -5,7 +5,7 @@ const API_URL = 'http://localhost:3000';
 
 const GITHUB_TOKEN = process.env.TEST_GITHUB_TOKEN;
 const DEVREV_TOKEN = process.env.TEST_DEVREV_TOKEN;
-const GITHUB_REPO = process.env.TEST_GITHUB_REPO || 'release-note-repo';
+const GITHUB_REPO = process.env.TEST_GITHUB_REPO || 'testing-release-notes';
 const GITHUB_OWNER = process.env.TEST_GITHUB_OWNER || 'qk-snapin-org';
 
 /**
@@ -39,7 +39,7 @@ test.describe('Full Generate Flow — GitHub', () => {
     const repos = await reposRes.json();
     expect(Array.isArray(repos)).toBe(true);
     const testRepo = repos.find(r => r.name === GITHUB_REPO);
-    expect(testRepo, `Repo ${GITHUB_REPO} not found in ${repos.map(r=>r.name).join(', ')}`).toBeTruthy();
+    expect(testRepo, `Repo ${GITHUB_REPO} not found in ${repos.map(r => r.name).join(', ')}`).toBeTruthy();
 
     // 3. Fetch commits
     const commitsRes = await apiCall(page, 'GET', `/api/github/commits?owner=${GITHUB_OWNER}&repo=${GITHUB_REPO}&branch=main`);

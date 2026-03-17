@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { X, Check, AlertCircle, Loader2, ExternalLink, RefreshCw, Lock } from 'lucide-react';
-import { useEntitlements } from '../../hooks/useEntitlements';
+import { X, Check, AlertCircle, ExternalLink, RefreshCw } from 'lucide-react';
 import api from '../../lib/api';
 import githubLogo from '../../assets/github.png';
 import jiraLogo from '../../assets/jira_logo.webp';
@@ -18,7 +17,6 @@ const CHANNEL_META = {
 
 const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJsonContent, isPublished }) => {
     const navigate = useNavigate();
-    const { canUse } = useEntitlements();
     // Channel enabled states
     const [githubEnabled, setGithubEnabled] = useState(false);
     const [jiraEnabled, setJiraEnabled] = useState(false);
@@ -324,7 +322,6 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                 connected={isConnected('github')}
                                 published={publishedChannels.includes('github')}
                                 onNavigate={(path) => { onClose(); navigate(path); }}
-                                locked={!canUse('publish_destinations', CHANNEL_META.github.destination).allowed}
                             >
                                 <div className="config-field">
                                     <label>Repository</label>
@@ -375,7 +372,6 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                 connected={isConnected('jira')}
                                 published={publishedChannels.includes('jira')}
                                 onNavigate={(path) => { onClose(); navigate(path); }}
-                                locked={!canUse('publish_destinations', CHANNEL_META.jira.destination).allowed}
                             >
                                 <div className="config-field">
                                     <label>Project</label>
@@ -413,7 +409,6 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                 connected={isConnected('devrev')}
                                 published={publishedChannels.includes('devrev')}
                                 onNavigate={(path) => { onClose(); navigate(path); }}
-                                locked={!canUse('publish_destinations', CHANNEL_META.devrev.destination).allowed}
                             >
                                 <div className="config-field">
                                     <label>Article Title</label>
@@ -494,22 +489,11 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
 };
 
 /* ── Channel Card wrapper ── */
-const ChannelCard = ({ type, enabled, onToggle, connected, published, onNavigate, locked, children }) => {
+const ChannelCard = ({ type, enabled, onToggle, connected, published, onNavigate, children }) => {
     const meta = CHANNEL_META[type];
     return (
-        <div className={`channel-card ${enabled ? 'active' : ''} ${published ? 'published' : ''} ${locked ? 'locked' : ''}`} data-channel={type} style={locked ? { opacity: 0.6, pointerEvents: 'none', position: 'relative' } : undefined}>
-            {locked && (
-                <div style={{
-                    position: 'absolute', top: 8, right: 12, zIndex: 2,
-                    display: 'flex', alignItems: 'center', gap: 4,
-                    fontSize: 11, fontWeight: 600, color: 'var(--amber)',
-                    background: 'var(--al)', padding: '3px 8px', borderRadius: 'var(--rs)',
-                    pointerEvents: 'auto',
-                }}>
-                    <Lock size={11} /> Pro
-                </div>
-            )}
-            <div className="channel-card-header" onClick={() => !locked && connected && onToggle(!enabled)}>
+        <div className={`channel-card ${enabled ? 'active' : ''} ${published ? 'published' : ''}`} data-channel={type}>
+            <div className="channel-card-header" onClick={() => connected && onToggle(!enabled)}>
                 <div className="channel-card-info">
                     <div className="channel-card-icon">
                         <img src={meta.logo} alt={meta.name} />
@@ -520,24 +504,24 @@ const ChannelCard = ({ type, enabled, onToggle, connected, published, onNavigate
                             {published && <span className="channel-published-badge"><Check size={10} /> Published</span>}
                         </div>
                         <div className="channel-card-subtitle">
-                            {locked ? 'Upgrade to Pro' : connected ? (enabled ? 'Enabled' : 'Click to enable') : 'Not connected'}
+                            {connected ? (enabled ? 'Enabled' : 'Click to enable') : 'Not connected'}
                         </div>
                     </div>
                 </div>
-                {connected && !locked && (
+                {connected && (
                     <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
                         <input type="checkbox" checked={enabled} onChange={(e) => onToggle(e.target.checked)} />
                         <span className="toggle-slider" />
                     </label>
                 )}
             </div>
-            {!connected && !locked && (
+            {!connected && (
                 <div className="channel-not-connected">
                     <AlertCircle size={14} />
                     Not connected — <a className="channel-connect-link" onClick={(e) => { e.stopPropagation(); onNavigate('/integration'); }}>go to Integrations</a> to set up {meta.name}
                 </div>
             )}
-            {enabled && connected && !locked && (
+            {enabled && connected && (
                 <div className="channel-config">
                     {children}
                 </div>
