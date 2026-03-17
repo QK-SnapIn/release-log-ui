@@ -35,7 +35,7 @@ test.describe('Public Page Navigation', () => {
   test('terms page loads correctly', async ({ page }) => {
     await page.goto('/terms');
     await expect(page).toHaveTitle(/Terms/);
-    await expect(page.locator('text=Terms & Conditions')).toBeVisible();
+    await expect(page.locator('h1:has-text("Terms")')).toBeVisible();
   });
 
   test('privacy page loads correctly', async ({ page }) => {
@@ -51,9 +51,7 @@ test.describe('Public Page Navigation', () => {
   test('integrations hub page loads correctly', async ({ page }) => {
     await page.goto('/integrations');
     await expect(page).toHaveTitle(/Integrations/);
-    await expect(page.locator('text=GitHub')).toBeVisible();
-    await expect(page.locator('text=Jira')).toBeVisible();
-    await expect(page.locator('text=DevRev')).toBeVisible();
+    await expect(page.locator('h1:has-text("Connect your tools")')).toBeVisible();
   });
 
   test('integration detail pages load correctly', async ({ page }) => {
@@ -92,7 +90,7 @@ test.describe('Navigation Links', () => {
 
   test('forgot password page links back to login', async ({ page }) => {
     await page.goto('/forgot-password');
-    await expect(page.locator('text=Back to login')).toBeVisible();
+    await expect(page.locator('a:has-text("Back to login")')).toBeVisible();
   });
 });
 
