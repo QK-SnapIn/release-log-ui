@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import axios from 'axios';
 import './PublicNote.css';
 import logo from '../../assets/logos/releaslyy-combined.svg';
@@ -60,7 +61,7 @@ export default function PublicNote() {
                     By {note.author_name} &middot; {new Date(note.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
                 <div className="public-note-body">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{note.content}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{note.content}</ReactMarkdown>
                 </div>
             </article>
             <footer className="public-note-footer">

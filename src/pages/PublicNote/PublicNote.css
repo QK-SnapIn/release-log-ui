@@ -71,11 +71,16 @@
     overflow-x: auto;
 }
 
+.public-note-body {
+    overflow-x: auto;
+}
+
 .public-note-body table {
     width: 100%;
     border-collapse: collapse;
     margin: 16px 0;
     font-size: 14px;
+    min-width: 400px;
 }
 
 .public-note-body th,
