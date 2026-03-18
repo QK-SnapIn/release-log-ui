@@ -116,7 +116,7 @@ export default function PlansBilling() {
       }
     } catch (err) {
       // Revert pending subscription if payment was cancelled or failed
-      try { await api.post('/billing/cancel-pending'); } catch {}
+      try { await api.post('/billing/cancel-pending'); } catch { }
       if (err.message !== 'Payment cancelled') {
         toast.error(err.response?.data?.error || 'Failed to subscribe');
       }
@@ -212,7 +212,7 @@ export default function PlansBilling() {
             boxShadow: isAnnual ? 'var(--sh)' : 'none', transition: 'all 0.2s',
           }}>
             Annual
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--et)', marginLeft: 6 }}>Save 20%</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--et)', marginLeft: 6 }}>Save 8%</span>
           </button>
         </div>
 

@@ -13,7 +13,7 @@ function detectCurrency() {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     if (tz.startsWith('Asia/Kolkata') || tz.startsWith('Asia/Calcutta')) return 'INR';
-  } catch {}
+  } catch { }
   return 'USD';
 }
 
@@ -171,9 +171,9 @@ export default function PricingPage() {
 
   useEffect(() => {
     // Fetch plans
-    api.get('/plans').then(r => setPlans(r.data || [])).catch(() => {});
+    api.get('/plans').then(r => setPlans(r.data || [])).catch(() => { });
     // Check if logged in
-    authApi.get('/auth/me').then(r => setUser(r.data)).catch(() => {});
+    authApi.get('/auth/me').then(r => setUser(r.data)).catch(() => { });
   }, []);
 
   const handleAction = async (action, plan) => {
@@ -263,7 +263,7 @@ export default function PricingPage() {
                 boxShadow: isAnnual ? '0 1px 3px rgba(0,0,0,0.08)' : 'none', transition: 'all 0.2s ease',
               }}>
                 Annual
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#16a34a', marginLeft: 6 }}>Save 20%</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#16a34a', marginLeft: 6 }}>Save 8%</span>
               </button>
             </div>
 
