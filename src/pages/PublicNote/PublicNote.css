@@ -1,0 +1,106 @@
+.public-note-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    min-height: 100vh;
+}
+
+.public-note-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border, #e2e8f0);
+}
+
+.public-note-brand {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary, #6366f1);
+    text-decoration: none;
+}
+
+.public-note-badge {
+    font-size: 11px;
+    color: var(--muted, #94a3b8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.public-note-content h1 {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0 0 12px;
+}
+
+.public-note-meta {
+    font-size: 13px;
+    color: var(--muted, #94a3b8);
+    margin-bottom: 32px;
+}
+
+.public-note-body {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text, #1e293b);
+}
+
+.public-note-body h2, .public-note-body h3 {
+    margin-top: 24px;
+    margin-bottom: 8px;
+}
+
+.public-note-body ul, .public-note-body ol {
+    padding-left: 20px;
+    margin: 12px 0;
+}
+
+.public-note-body code {
+    background: var(--s1, #f1f5f9);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.public-note-body pre {
+    background: var(--s1, #f1f5f9);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.public-note-footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border, #e2e8f0);
+    font-size: 12px;
+    color: var(--muted, #94a3b8);
+    text-align: center;
+}
+
+.public-note-footer a {
+    color: var(--primary, #6366f1);
+    text-decoration: none;
+}
+
+.public-note-loading, .public-note-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 16px;
+    color: var(--muted, #94a3b8);
+}
+
+.public-note-error h2 {
+    color: var(--text, #1e293b);
+}
+
+.public-note-cta {
+    color: var(--primary, #6366f1);
+    text-decoration: none;
+    font-weight: 600;
+}

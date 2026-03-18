@@ -20,6 +20,7 @@ import JiraLanding from './pages/IntegrationLanding/JiraLanding';
 import GitHubLanding from './pages/IntegrationLanding/GitHubLanding';
 import SlackLanding from './pages/IntegrationLanding/SlackLanding';
 import IntegrationsPage from './pages/Integrations/IntegrationsPage';
+import PublicNote from './pages/PublicNote/PublicNote';
 import Signup from './pages/Signup/Signup';
 import VerifyOtp from './pages/VerifyOtp/VerifyOtp';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
@@ -82,6 +83,7 @@ function App() {
         <Route path="/integrations/jira" element={<JiraLanding />} />
         <Route path="/integrations/github" element={<GitHubLanding />} />
         <Route path="/integrations/slack" element={<SlackLanding />} />
+        <Route path="/n/:slug" element={<PublicNote />} />
 
         {/* Authenticated routes — sidebar layout */}
         <Route element={<AppShell />}>
