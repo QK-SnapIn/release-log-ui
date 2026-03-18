@@ -615,7 +615,7 @@ const Dashboard = () => {
     const handleViewNote = async (noteId) => {
         try {
             const res = await api.get(`/notes/${noteId}`);
-            navigate('/generate', { state: { notes: res.data.note.content, noteId: noteId, noteTitle: res.data.note.title, published: res.data.note.published } });
+            navigate('/generate', { state: { notes: res.data.note.content, noteId: noteId, noteTitle: res.data.note.title, published: res.data.note.published, is_public: res.data.note.is_public, public_slug: res.data.note.public_slug } });
         } catch (err) {
             console.error('Failed to fetch note content:', err);
             toast.error('Failed to load the release note.');

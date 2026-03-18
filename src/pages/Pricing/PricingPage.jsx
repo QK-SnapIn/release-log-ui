@@ -310,7 +310,7 @@ export default function PricingPage() {
             { q: 'Can I use my own API key on the free plan?', a: 'BYOK (Bring Your Own Key) is a Pro feature. The free plan uses Releaslyy AI, our built-in model that requires no API key.' },
             { q: "What's included in the 14-day trial?", a: 'The full Pro plan — unlimited generations, all integrations, multi-source, publish-back, and BYOK. No credit card needed to start.' },
             { q: 'Can I cancel anytime?', a: "Yes. Cancel from your Settings page at any time. You'll keep access until the end of your billing period." },
-            { q: "What about Slack publishing? It says 'soon'.", a: "We're actively building Slack integration. It'll be included in Pro at no extra cost as soon as it ships. Same for Zoho Sprints." },
+            { q: "Does Pro include Slack publishing?", a: "Yes! Slack is fully supported. Connect your workspace, pick a channel, and publish — as full release notes or an AI-generated summary with a link to the public changelog." },
             { q: 'When will Team and Enterprise plans be available?', a: "We're building team collaboration features now. Join the waitlist and we'll notify you as soon as they're ready." },
             { q: 'What payment methods are supported?', a: 'We use Razorpay for payments. UPI, Indian cards, netbanking, and international cards are all supported.' },
           ].map((faq, i) => (

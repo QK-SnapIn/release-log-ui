@@ -157,7 +157,7 @@ export default function SlackLanding() {
     <div className="landing-root">
       <SEO
         title="Slack Integration — Auto-Publish Release Notes to Slack"
-        description="Automatically publish AI-generated release notes to Slack channels. Rich formatting, thread support, and team mentions. Coming soon to Releaslyy."
+        description="Publish AI-generated release notes to Slack channels. Full notes or AI summaries with public changelog links. Available now on Releaslyy."
         keywords="slack release notes, slack changelog, slack integration, publish release notes to slack, slack release notifications, automated slack updates, release notes slack bot, slack release notes integration"
         canonical="https://releaslyy.com/integrations/slack"
       />
@@ -177,7 +177,7 @@ export default function SlackLanding() {
               fontSize: 13, color: 'var(--land-teal)', fontWeight: 500, marginBottom: 32,
             }}>
               <Sparkles size={14} />
-              Coming Soon — Slack Integration
+              Now Available — Slack Integration
             </div>
           </FadeIn>
 
@@ -199,16 +199,16 @@ export default function SlackLanding() {
 
           <FadeIn delay={0.2}>
             <p className="land-hero-subtitle" style={{ fontSize: 18, color: 'var(--land-muted)', maxWidth: 580, margin: '0 auto 40px', lineHeight: 1.65 }}>
-              Generate release notes from any source and automatically broadcast to your Slack channels. Rich formatting, thread support, and team @mentions.
+              Generate release notes from any source and publish to your Slack channels. Choose full notes or an AI-generated summary with a link to the public changelog.
             </p>
           </FadeIn>
 
           <FadeIn delay={0.3}>
             <div className="integ-hero-btns" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => navigate('/support')} className="land-btn land-btn-p">Join the waitlist {I.arrow}</button>
+              <button onClick={() => navigate('/signup')} className="land-btn land-btn-p">Get Started Free {I.arrow}</button>
               <button onClick={() => navigate('/docs')} className="land-btn land-btn-s">
                 <span style={{ display: 'flex', color: 'var(--land-muted)' }}>{I.plug}</span>
-                View Integrations
+                View Docs
               </button>
             </div>
           </FadeIn>
@@ -296,7 +296,7 @@ export default function SlackLanding() {
                   background: 'rgba(16,185,129,.1)', border: '1px solid rgba(16,185,129,.2)',
                   fontSize: 12, color: '#10b981', fontWeight: 600, marginBottom: 24,
                 }}>
-                  Coming Soon / Future Goals
+                  How It Works
                 </div>
                 <h2 style={{ fontSize: 'clamp(26px, 3.5vw, 40px)', fontWeight: 700, letterSpacing: '-.03em', marginBottom: 16, color: '#f1f5f9' }}>
                   Automatically Send Release Notes to{' '}
@@ -379,13 +379,13 @@ export default function SlackLanding() {
               <div className="land-orb" style={{ width: 400, height: 400, opacity: 0.06, background: 'radial-gradient(circle,rgba(16,185,129,.4),transparent)', top: -150, left: '50%', marginLeft: -200 }} />
               <div style={{ position: 'relative', zIndex: 2 }}>
                 <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 700, letterSpacing: '-.03em', marginBottom: 16, color: 'var(--land-text)' }}>
-                  Join the Slack integration waitlist
+                  Start publishing to Slack today
                 </h2>
                 <p style={{ fontSize: 16, color: 'var(--land-muted)', maxWidth: 460, margin: '0 auto 32px', lineHeight: 1.6 }}>
-                  Be the first to know when Slack auto-publishing launches. Generate from GitHub, Jira, or DevRev -- and broadcast to Slack in one click.
+                  Generate from GitHub, Jira, or DevRev — and broadcast to Slack in one click. Full notes or AI summaries. Free to start.
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button onClick={() => navigate('/support')} className="land-btn land-btn-p">Join the waitlist {I.arrow}</button>
+                  <button onClick={() => navigate('/signup')} className="land-btn land-btn-p">Get Started Free {I.arrow}</button>
                 </div>
               </div>
             </div>

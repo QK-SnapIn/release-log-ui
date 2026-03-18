@@ -94,6 +94,27 @@
   cursor: not-allowed;
 }
 
+.verify-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--amber-l, #fef3c7);
+  border: 1px solid var(--amber, #f59e0b);
+  border-radius: var(--rs);
+  padding: 12px 14px;
+  margin-bottom: 24px;
+  text-align: left;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.verify-warning svg {
+  flex-shrink: 0;
+  color: var(--amber, #f59e0b);
+  margin-top: 2px;
+}
+
 .resend-row {
   margin-top: 20px;
   font-size: 0.875rem;

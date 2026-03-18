@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, Mail, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authApi } from '../../lib/api';
 import SEO from '../../components/SEO';
@@ -13,6 +13,8 @@ const VerifyOtp = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const isNonGmail = email && !/\b(gmail|yahoo|protonmail|icloud)\./.test(email);
+
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -92,6 +94,13 @@ const VerifyOtp = () => {
         <p className="verify-email-text">
           We sent a 6-digit code to <strong>{email}</strong>
         </p>
+
+        {isNonGmail && (
+          <div className="verify-warning">
+            <AlertTriangle size={16} />
+            <span>We are experiencing delays sending OTP to company/Microsoft 365 emails. If you don't receive it, please try with a Gmail or other personal email.</span>
+          </div>
+        )}
 
         <form onSubmit={handleVerify}>
           <div className="otp-input-group" onPaste={handlePaste}>

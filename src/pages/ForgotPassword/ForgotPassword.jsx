@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, KeyRound } from 'lucide-react';
+import { ArrowLeft, KeyRound, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authApi } from '../../lib/api';
 import SEO from '../../components/SEO';
@@ -52,6 +52,12 @@ const ForgotPassword = () => {
             <div className="forgot-success">
               Check your inbox for a 6-digit code sent to <strong>{email}</strong>
             </div>
+            {!/\b(gmail|yahoo|protonmail|icloud)\./.test(email) && (
+              <div className="verify-warning">
+                <AlertTriangle size={16} />
+                <span>We are experiencing delays sending OTP to company/Microsoft 365 emails. If you don't receive it, please try with a Gmail or other personal email.</span>
+              </div>
+            )}
             <button onClick={handleContinue} className="signup-submit-btn">
               Enter reset code
             </button>

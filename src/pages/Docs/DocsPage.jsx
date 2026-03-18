@@ -168,8 +168,12 @@ const SECTIONS = {
           <li><strong>GitHub Releases</strong> — Publish as a GitHub release to your selected repository. Choose the tag name and whether to mark it as a draft or pre-release.</li>
           <li><strong>Jira</strong> — Publish to a Jira release version. Select the project and version to attach the notes to.</li>
           <li><strong>DevRev</strong> — Publish as a part or article in your DevRev workspace.</li>
+          <li><strong>Slack</strong> — Post release notes to any Slack channel. Choose between <strong>Full</strong> mode (complete notes with rich formatting) or <strong>Summary</strong> mode (AI-generated 3-5 bullet summary with a link to the full public changelog).</li>
         </ul>
         <p>Each channel shows its publish status (success, failed, pending) with retry support for failed publishes.</p>
+
+        <h3>Public Changelog</h3>
+        <p>Toggle any release note to <strong>Public</strong> from the publish panel to generate a shareable link. Public notes are accessible at <code>/n/&#123;slug&#125;</code> without login — share with stakeholders, embed in Slack summaries, or link from external tools. Toggle back to <strong>Private</strong> to revoke access instantly.</p>
 
         <h3>Export Options</h3>
         <p>Use the <strong>Export</strong> dropdown in the top bar to download your release notes:</p>
@@ -180,7 +184,7 @@ const SECTIONS = {
         </ul>
 
         <h3>Copy to Clipboard</h3>
-        <p>Click the copy button in the editor to copy the full content as formatted text, ready to paste into Slack, Notion, email, or any other tool.</p>
+        <p>Click the copy button in the editor to copy the full content as formatted text, ready to paste into Notion, email, or any other tool.</p>
       </>
     ),
   },
@@ -195,14 +199,17 @@ const SECTIONS = {
           <li><strong>GitHub</strong> — Connect via Personal Access Token to pull merged PRs from your repositories. Also used as a publish channel for GitHub Releases.</li>
           <li><strong>Jira</strong> — Connect via OAuth to pull issues from sprints or release versions. Supports multi-site selection, multi-select for sprints and versions, searchable dropdowns, and issue filtering by type, status, priority, assignee, and labels. Also used as a publish channel.</li>
           <li><strong>DevRev</strong> — Connect with a Personal Access Token to browse sprint boards, select sprints, and pick individual work items. Also used as a publish channel.</li>
+          <li><strong>Slack</strong> — Connect via OAuth to publish release notes directly to Slack channels. Supports full release notes or AI-generated summaries with a link to the public changelog.</li>
         </ul>
+
+        <h3>Public Release Notes</h3>
+        <p>Any release note can be made public with a shareable link. Toggle visibility from the editor — public notes are accessible at <code>/n/&#123;slug&#125;</code> without login. Use this to share changelogs with stakeholders, embed in Slack summaries, or link from external tools.</p>
 
         <h3>Planned Integrations</h3>
         <p>We're actively building integrations for:</p>
         <ul>
           <li><strong>GitLab</strong> — Pull merge requests and tags</li>
           <li><strong>Bitbucket</strong> — Pull commits and PRs</li>
-          <li><strong>Slack</strong> — Post release notes directly to channels</li>
           <li><strong>Confluence</strong> — Sync with your team's knowledge base</li>
         </ul>
       </>

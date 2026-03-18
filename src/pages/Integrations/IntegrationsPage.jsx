@@ -10,6 +10,7 @@ import githubLogo from '../../assets/github.png';
 import jiraLogo from '../../assets/jira_logo.webp';
 import devrevLogo from '../../assets/devrev-logo.webp';
 import zohoLogo from '../../assets/Zoho-logo.webp';
+import slackLogo from '../../assets/slack-logo.png';
 import '../Landing/LandingPage.css';
 import './IntegrationsPage.css';
 
@@ -44,7 +45,7 @@ const INTEGRATIONS = [
   {
     id: 'slack',
     name: 'Slack',
-    logo: null,
+    logo: slackLogo,
     logoAlt: 'Slack',
     description: 'Auto-publish release notes to Slack channels. Rich formatting, thread support, and team mentions.',
     status: 'available',

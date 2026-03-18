@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import axios from 'axios';
 import './PublicNote.css';
 
@@ -55,7 +56,9 @@ export default function PublicNote() {
                 <div className="public-note-meta">
                     By {note.author_name} &middot; {new Date(note.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
-                <ReactMarkdown className="public-note-body">{note.content}</ReactMarkdown>
+                <div className="public-note-body">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{note.content}</ReactMarkdown>
+                </div>
             </article>
             <footer className="public-note-footer">
                 <p>Generated with <a href="https://releaslyy.com">Releaslyy</a> — AI-powered release notes</p>

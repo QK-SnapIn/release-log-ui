@@ -10,6 +10,7 @@ import devrevLogo from '../../assets/devrev-logo.webp';
 import gitlabLogo from '../../assets/gitlab-logo.png';
 import bitbucketLogo from '../../assets/bitbucket_icon.webp';
 import jiraLogo from '../../assets/jira_logo.webp';
+import slackLogo from '../../assets/slack-logo.png';
 import './Integration.css';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import api from '../../lib/api';
@@ -80,7 +81,7 @@ const INTEGRATIONS = [
         title: 'Slack',
         description: 'Publish release notes to Slack channels',
         category: 'communication',
-        abbr: 'SL',
+        logo: slackLogo,
         accentVar: '--amber',
         soon: false,
         dashboardUrl: null,

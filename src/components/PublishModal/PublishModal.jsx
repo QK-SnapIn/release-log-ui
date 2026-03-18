@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { X, Check, AlertCircle, ExternalLink, RefreshCw } from 'lucide-react';
+import { X, Check, AlertCircle, ExternalLink, RefreshCw, Globe, Lock, Copy, Loader2 } from 'lucide-react';
 import api from '../../lib/api';
 import githubLogo from '../../assets/github.png';
 import jiraLogo from '../../assets/jira_logo.webp';
@@ -54,6 +54,11 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
     const [slackChannelName, setSlackChannelName] = useState('');
     const [slackFormat, setSlackFormat] = useState('full');
 
+    // Public visibility
+    const [isPublic, setIsPublic] = useState(false);
+    const [publicSlug, setPublicSlug] = useState(null);
+    const [visibilityLoading, setVisibilityLoading] = useState(false);
+
     // Connected status
     const [connectedServices, setConnectedServices] = useState([]);
 
@@ -80,6 +85,11 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
             api.get(`/publish/history/${noteId}`).then((res) => {
                 setPublishedChannels(res.data.publishedChannels || []);
             }).catch((err) => { toast.error(err.response?.data?.error || 'Failed to load publish history'); });
+
+            api.get(`/notes/${noteId}`).then((res) => {
+                setIsPublic(res.data.note?.is_public || false);
+                setPublicSlug(res.data.note?.public_slug || null);
+            }).catch(() => {});
         }
     }, [open, noteTitle, noteId]);
 
@@ -136,6 +146,26 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
         return () => document.removeEventListener('keydown', handleKey);
     }, [open, onClose]);
 
+    const handleVisibilityToggle = async () => {
+        setVisibilityLoading(true);
+        try {
+            const res = await api.put(`/notes/${noteId}/visibility`, { is_public: !isPublic });
+            setIsPublic(res.data.is_public);
+            setPublicSlug(res.data.public_slug);
+            if (res.data.is_public) {
+                toast.success('Note is now public!');
+            } else {
+                toast.success('Note is now private.');
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.error || 'Failed to update visibility.');
+        } finally {
+            setVisibilityLoading(false);
+        }
+    };
+
+    const publicUrl = publicSlug ? `${window.location.origin}/n/${publicSlug}` : null;
+
     const enabledCount = [githubEnabled, jiraEnabled, devrevEnabled, slackEnabled].filter(Boolean).length;
 
     // Validation: check required fields per enabled channel
@@ -150,21 +180,6 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
     const handlePublish = useCallback(async () => {
         if (enabledCount === 0) return;
         setPublishing(true);
-
-        // Prompt to make note public for Slack summary mode
-        if (slackEnabled && slackFormat === 'summary') {
-            try {
-                const noteRes = await api.get(`/notes/${noteId}`);
-                if (!noteRes.data.is_public) {
-                    const makePublic = window.confirm(
-                        'Summary mode includes a "View full notes" link. Make this note public so anyone with the link can read it?'
-                    );
-                    if (makePublic) {
-                        await api.put(`/notes/${noteId}/visibility`, { is_public: true });
-                    }
-                }
-            } catch { /* proceed anyway */ }
-        }
 
         const htmlContent = getHtmlContent();
         const jsonContent = getJsonContent ? getJsonContent() : null;
@@ -363,6 +378,61 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                     ) : (
                         /* ── Channel Cards ── */
                         <>
+                            {/* Public Changelog */}
+                            <div className={`channel-card ${isPublic ? 'active' : ''}`} data-channel="public">
+                                <div className="channel-card-header" onClick={handleVisibilityToggle}>
+                                    <div className="channel-card-info">
+                                        <div className="channel-card-icon" style={{ background: 'var(--indigo-il, #eef2ff)', color: 'var(--indigo, #6366f1)' }}>
+                                            {isPublic ? <Globe size={18} /> : <Lock size={18} />}
+                                        </div>
+                                        <div>
+                                            <div className="channel-card-title">
+                                                Public Changelog
+                                                {isPublic && <span className="channel-published-badge" style={{ background: 'var(--emerald-il, #ecfdf5)', color: 'var(--emerald, #10b981)' }}><Globe size={10} /> Public</span>}
+                                            </div>
+                                            <div className="channel-card-subtitle">
+                                                {isPublic ? 'Anyone with the link can view' : 'Click to make this note public'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <label className="toggle-switch" onClick={(e) => e.stopPropagation()}>
+                                        <input type="checkbox" checked={isPublic} onChange={handleVisibilityToggle} disabled={visibilityLoading} />
+                                        <span className="toggle-slider" />
+                                    </label>
+                                </div>
+                                {isPublic && publicUrl && (
+                                    <div className="channel-config">
+                                        <div className="config-field">
+                                            <label>Shareable URL</label>
+                                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                                <input
+                                                    type="text"
+                                                    value={publicUrl}
+                                                    readOnly
+                                                    style={{ flex: 1, fontSize: 12, color: 'var(--muted)' }}
+                                                    onClick={(e) => e.target.select()}
+                                                />
+                                                <button
+                                                    className="btn btn-sm btn-secondary"
+                                                    style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(publicUrl);
+                                                        toast.success('Link copied!');
+                                                    }}
+                                                >
+                                                    <Copy size={12} /> Copy
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                {visibilityLoading && (
+                                    <div style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--muted)' }}>
+                                        <Loader2 size={12} className="spin" /> Updating...
+                                    </div>
+                                )}
+                            </div>
+
                             {/* GitHub */}
                             <ChannelCard
                                 type="github"
@@ -548,6 +618,7 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                             </ChannelCard>
                         </>
                     )}
+
                 </div>
 
                 {/* Footer */}

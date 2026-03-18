@@ -112,9 +112,6 @@ const GenerateEdit = () => {
     const [copied, setCopied] = useState(false);
     const [showPublishModal, setShowPublishModal] = useState(false);
     const [isPublished, setIsPublished] = useState(false);
-    const [isPublic, setIsPublic] = useState(false);
-    const [publicSlug, setPublicSlug] = useState(null);
-    const [visibilityLoading, setVisibilityLoading] = useState(false);
 
     // Convert incoming markdown to HTML
     useEffect(() => {
@@ -124,8 +121,6 @@ const GenerateEdit = () => {
             if (location.state.noteId) setNoteId(location.state.noteId);
             if (location.state.noteTitle) setNoteTitle(location.state.noteTitle);
             if (location.state.published) setIsPublished(true);
-            setIsPublic(location.state.is_public || false);
-            setPublicSlug(location.state.public_slug || null);
         } else {
             navigate('/dashboard');
         }
@@ -221,24 +216,6 @@ const GenerateEdit = () => {
         }
     }, [noteId, editor, noteTitle]);
 
-    const handleVisibilityToggle = async () => {
-        setVisibilityLoading(true);
-        try {
-            const res = await api.put(`/notes/${noteId}/visibility`, { is_public: !isPublic });
-            setIsPublic(res.data.is_public);
-            setPublicSlug(res.data.public_slug);
-            if (res.data.is_public) {
-                toast.success('Note is now public! Link copied to clipboard.');
-                navigator.clipboard.writeText(`${window.location.origin}/n/${res.data.public_slug}`);
-            } else {
-                toast.success('Note is now private.');
-            }
-        } catch (err) {
-            toast.error(err.response?.data?.error || 'Failed to update visibility.');
-        } finally {
-            setVisibilityLoading(false);
-        }
-    };
 
     const handlePublish = async () => {
         if (!editor) return;
@@ -343,27 +320,6 @@ const GenerateEdit = () => {
                                     <FileText size={14} /> PDF (.pdf)
                                 </button>
                             </div>
-                        )}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <button
-                            className={`btn btn-sm ${isPublic ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={handleVisibilityToggle}
-                            disabled={visibilityLoading}
-                        >
-                            {isPublic ? 'Public' : 'Private'}
-                        </button>
-                        {isPublic && publicSlug && (
-                            <button
-                                className="btn btn-sm btn-secondary"
-                                onClick={() => {
-                                    navigator.clipboard.writeText(`${window.location.origin}/n/${publicSlug}`);
-                                    toast.success('Link copied!');
-                                }}
-                                title="Copy public link"
-                            >
-                                Copy Link
-                            </button>
                         )}
                     </div>
                     <button className={`btn btn-primary editor-publish-btn ${isPublished ? 'published' : ''}`} onClick={handlePublish} disabled={saving}>
