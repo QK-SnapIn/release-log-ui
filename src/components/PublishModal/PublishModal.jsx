@@ -7,12 +7,14 @@ import api from '../../lib/api';
 import githubLogo from '../../assets/github.png';
 import jiraLogo from '../../assets/jira_logo.webp';
 import devrevLogo from '../../assets/devrev-logo.webp';
+import slackLogo from '../../assets/slack-logo.png';
 import './PublishModal.css';
 
 const CHANNEL_META = {
     github: { name: 'GitHub Releases', logo: githubLogo, destination: 'github_releases' },
     jira: { name: 'Jira Release', logo: jiraLogo, destination: 'jira_release' },
     devrev: { name: 'DevRev Article', logo: devrevLogo, destination: 'devrev_article' },
+    slack: { name: 'Slack', logo: slackLogo, destination: 'slack' },
 };
 
 const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJsonContent, isPublished }) => {
@@ -44,6 +46,12 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
     const [devrevStatus, setDevrevStatus] = useState('published');
     const [devrevAccess, setDevrevAccess] = useState('internal');
     const [devrevPart, setDevrevPart] = useState('');
+
+    // Slack config
+    const [slackEnabled, setSlackEnabled] = useState(false);
+    const [slackChannels, setSlackChannels] = useState([]);
+    const [slackChannel, setSlackChannel] = useState('');
+    const [slackChannelName, setSlackChannelName] = useState('');
 
     // Connected status
     const [connectedServices, setConnectedServices] = useState([]);
@@ -110,6 +118,15 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
         }
     }, [devrevEnabled, connectedServices]);
 
+    // Load Slack channels when enabled
+    useEffect(() => {
+        if (slackEnabled && slackChannels.length === 0 && connectedServices.includes('slack')) {
+            api.get('/publish/slack/channels').then((res) => {
+                setSlackChannels(res.data.channels || []);
+            }).catch((err) => { toast.error(err.response?.data?.error || 'Failed to load Slack channels'); });
+        }
+    }, [slackEnabled, connectedServices]);
+
     // Close on Escape
     useEffect(() => {
         if (!open) return;
@@ -118,13 +135,14 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
         return () => document.removeEventListener('keydown', handleKey);
     }, [open, onClose]);
 
-    const enabledCount = [githubEnabled, jiraEnabled, devrevEnabled].filter(Boolean).length;
+    const enabledCount = [githubEnabled, jiraEnabled, devrevEnabled, slackEnabled].filter(Boolean).length;
 
     // Validation: check required fields per enabled channel
     const hasValidConfig = (() => {
         if (githubEnabled && (!ghRepo || !ghTag)) return false;
         if (jiraEnabled && (!jiraProject || !jiraVersionName)) return false;
         if (devrevEnabled && !devrevTitle) return false;
+        if (slackEnabled && !slackChannel) return false;
         return true;
     })();
 
@@ -169,6 +187,16 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                 },
             });
         }
+        if (slackEnabled) {
+            channels.push({
+                type: 'slack',
+                enabled: true,
+                config: {
+                    channelId: slackChannel,
+                    channelName: slackChannelName,
+                },
+            });
+        }
 
         try {
             const res = await api.post('/publish', {
@@ -204,10 +232,11 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
         } finally {
             setPublishing(false);
         }
-    }, [enabledCount, getHtmlContent, noteId, githubEnabled, jiraEnabled, devrevEnabled,
+    }, [enabledCount, getHtmlContent, noteId, githubEnabled, jiraEnabled, devrevEnabled, slackEnabled,
         ghRepo, ghTag, ghTitle, ghPrerelease, ghDraft,
         jiraProject, jiraVersionName, jiraMarkReleased, jiraAddComments,
-        devrevTitle, devrevStatus, devrevAccess, devrevPart]);
+        devrevTitle, devrevStatus, devrevAccess, devrevPart,
+        slackChannel, slackChannelName]);
 
     const handleRetry = useCallback(async (channelType) => {
         setPublishing(true);
@@ -219,6 +248,8 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
             config = { repo: ghRepo, tag: ghTag, title: ghTitle, prerelease: ghPrerelease, draft: ghDraft };
         } else if (channelType === 'jira') {
             config = { projectKey: jiraProject, versionName: jiraVersionName, markReleased: jiraMarkReleased, addComments: jiraAddComments, issueKeys: [] };
+        } else if (channelType === 'slack') {
+            config = { channelId: slackChannel, channelName: slackChannelName };
         } else {
             config = { title: devrevTitle, status: devrevStatus, accessLevel: devrevAccess, partId: devrevPart || undefined, partName: devrevPart ? devrevParts.find(p => p.id === devrevPart)?.name : undefined };
         }
@@ -254,7 +285,8 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
         }
     }, [getHtmlContent, noteId, ghRepo, ghTag, ghTitle, ghPrerelease, ghDraft,
         jiraProject, jiraVersionName, jiraMarkReleased, jiraAddComments,
-        devrevTitle, devrevStatus, devrevAccess, devrevPart]);
+        devrevTitle, devrevStatus, devrevAccess, devrevPart,
+        slackChannel, slackChannelName]);
 
     if (!open) return null;
 
@@ -446,6 +478,32 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                         </select>
                                     </div>
                                 )}
+                            </ChannelCard>
+
+                            {/* Slack */}
+                            <ChannelCard
+                                type="slack"
+                                enabled={slackEnabled}
+                                onToggle={setSlackEnabled}
+                                connected={isConnected('slack')}
+                                published={publishedChannels.includes('slack')}
+                                onNavigate={(path) => { onClose(); navigate(path); }}
+                            >
+                                <div className="config-field">
+                                    <label>Channel</label>
+                                    <select value={slackChannel} onChange={(e) => {
+                                        setSlackChannel(e.target.value);
+                                        const selected = slackChannels.find(c => c.id === e.target.value);
+                                        setSlackChannelName(selected ? selected.name : '');
+                                    }}>
+                                        <option value="">Select channel...</option>
+                                        {slackChannels.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.is_private ? '🔒 ' : '#'}{c.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </ChannelCard>
                         </>
                     )}
