@@ -346,7 +346,7 @@ const SiteSelectModal = ({ sites, loading, onSelect, onClose }) => {
 
 /* ── Main Integration page ── */
 const Integration = () => {
-    const { connections: sharedConnections, loading: tokensLoading } = useTokens();
+    const { connections: sharedConnections, loading: tokensLoading, refetchTokens } = useTokens();
     const [connections, setConnections] = useState({});
     const [loadingState, setLoadingState] = useState({});
     const [errorState, setErrorState] = useState({});
@@ -369,6 +369,7 @@ const Integration = () => {
         const jiraStatus = searchParams.get('jira');
         if (jiraStatus === 'success') {
             setConnections(prev => ({ ...prev, jira: true }));
+            refetchTokens();
             setSearchParams({}, { replace: true });
         } else if (jiraStatus === 'select_site') {
             try {
@@ -385,6 +386,7 @@ const Integration = () => {
         const githubStatus = searchParams.get('github');
         if (githubStatus === 'success') {
             setConnections(prev => ({ ...prev, github: true }));
+            refetchTokens();
             toast.success('GitHub connected successfully!');
             setSearchParams({}, { replace: true });
         } else if (githubStatus === 'error') {
@@ -397,6 +399,7 @@ const Integration = () => {
         const slackStatus = searchParams.get('slack');
         if (slackStatus === 'success') {
             setConnections(prev => ({ ...prev, slack: true }));
+            refetchTokens();
             toast.success('Slack connected successfully!');
             setSearchParams({}, { replace: true });
         } else if (slackStatus === 'error') {
@@ -409,6 +412,7 @@ const Integration = () => {
         const linearStatus = searchParams.get('linear');
         if (linearStatus === 'success') {
             setConnections(prev => ({ ...prev, linear: true }));
+            refetchTokens();
             toast.success('Linear connected successfully!');
             setSearchParams({}, { replace: true });
         } else if (linearStatus === 'error') {
@@ -421,6 +425,7 @@ const Integration = () => {
         const asanaStatus = searchParams.get('asana');
         if (asanaStatus === 'success') {
             setConnections(prev => ({ ...prev, asana: true }));
+            refetchTokens();
             toast.success('Asana connected successfully!');
             setSearchParams({}, { replace: true });
         } else if (asanaStatus === 'error') {
@@ -433,6 +438,7 @@ const Integration = () => {
         const clickupStatus = searchParams.get('clickup');
         if (clickupStatus === 'success') {
             setConnections(prev => ({ ...prev, clickup: true }));
+            refetchTokens();
             toast.success('ClickUp connected successfully!');
             setSearchParams({}, { replace: true });
         } else if (clickupStatus === 'error') {
@@ -445,6 +451,7 @@ const Integration = () => {
         const mondayStatus = searchParams.get('monday');
         if (mondayStatus === 'success') {
             setConnections(prev => ({ ...prev, monday: true }));
+            refetchTokens();
             toast.success('Monday.com connected successfully!');
             setSearchParams({}, { replace: true });
         } else if (mondayStatus === 'error') {
@@ -578,6 +585,7 @@ const Integration = () => {
         try {
             await api.post(endpoint, { token });
             setConnections(prev => ({ ...prev, [editingIntegration]: true }));
+            refetchTokens();
             setEditingIntegration(null);
         } catch (err) {
             const msg = err.response?.data?.error || 'Failed to update. Please try again.';
@@ -592,6 +600,7 @@ const Integration = () => {
         try {
             await api.delete(`/tokens/${integrationId}`);
             setConnections(prev => ({ ...prev, [integrationId]: false }));
+            refetchTokens();
             setDeletingIntegration(null);
         } catch (err) {
             const msg = err.response?.data?.error || 'Failed to disconnect. Please try again.';
