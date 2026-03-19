@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { X, Check, AlertCircle, ExternalLink, RefreshCw, Globe, Lock, Copy, Loader2 } from 'lucide-react';
 import api from '../../lib/api';
+import { useTokens } from '../../hooks/useTokens';
 import githubLogo from '../../assets/github.png';
 import jiraLogo from '../../assets/jira_logo.webp';
 import devrevLogo from '../../assets/devrev-logo.webp';
@@ -27,6 +28,7 @@ const CHANNEL_META = {
 
 const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJsonContent, isPublished }) => {
     const navigate = useNavigate();
+    const { services: tokenServices } = useTokens();
     // Channel enabled states
     const [githubEnabled, setGithubEnabled] = useState(false);
     const [jiraEnabled, setJiraEnabled] = useState(false);
@@ -113,9 +115,7 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
         setGhTitle(noteTitle || '');
         setDevrevTitle(noteTitle || '');
 
-        api.get('/tokens').then((res) => {
-            setConnectedServices(res.data.services || []);
-        }).catch((err) => { toast.error(err.response?.data?.error || 'Failed to load connected services'); });
+        setConnectedServices(tokenServices);
 
         if (noteId) {
             api.get(`/publish/history/${noteId}`).then((res) => {
@@ -127,7 +127,7 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                 setPublicSlug(res.data.note?.public_slug || null);
             }).catch(() => {});
         }
-    }, [open, noteTitle, noteId]);
+    }, [open, noteTitle, noteId, tokenServices]);
 
     // Load GitHub repos when enabled
     useEffect(() => {

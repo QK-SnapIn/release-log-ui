@@ -1,12 +1,14 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { RefreshCw, Square, CheckSquare, Trash2, Search, X, Check, Plus, Loader2 } from 'lucide-react';
-import api, { authApi } from '../../lib/api';
+import api from '../../lib/api';
 import TopBar from '../../components/Header/Header';
 import DataSelector from '../../components/DataSelector/DataSelector';
 import Pill from '../../components/ui/Pill';
 import StepIndicator from '../../components/ui/StepIndicator';
 import SearchDropdown from '../../components/ui/SearchDropdown';
+import { useUser } from '../../hooks/useUser';
+import { useTokens } from '../../hooks/useTokens';
 import devrevLogo from '../../assets/devrev-logo.webp';
 import jiraLogo from '../../assets/jira_logo.webp';
 import linearLogo from '../../assets/linear-logo.svg';
@@ -50,16 +52,22 @@ const JIRA_FILTER_DEFS = [
     { key: 'labels', label: 'Labels', extract: i => i.labels || [], multi: true },
 ];
 
+const SERVICE_LABELS = { github: 'GitHub', devrev: 'DevRev', jira: 'Jira', linear: 'Linear', asana: 'Asana', clickup: 'ClickUp', monday: 'Monday.com' };
+
 const Dashboard = () => {
     const navigate = useNavigate();
     const { savedKeys, catalogue } = useLLMKeys();
     const { canUse, usage, entitlements, refetch: refetchEntitlements } = useEntitlements();
+    const { user } = useUser();
+    const { connections, services, loading: tokensLoading } = useTokens();
 
     // -- Global Dashboard State --
     const [view, setView] = useState('overview'); // 'overview' | 'generate'
-    const [sources, setSources] = useState(['github']); // array of 'github' | 'devrev' | 'jira'
-    const [user, setUser] = useState(null);
-    const [connectedIntegrations, setConnectedIntegrations] = useState([]);
+    const [sources, setSources] = useState([]); // array of 'github' | 'devrev' | 'jira'
+    const connectedIntegrations = useMemo(
+        () => services.map(s => SERVICE_LABELS[s] || s.charAt(0).toUpperCase() + s.slice(1)),
+        [services]
+    );
 
     // -- Notes State --
     const [generatedNotes, setGeneratedNotes] = useState([]);
@@ -204,83 +212,47 @@ const Dashboard = () => {
     };
     useEffect(() => { fetchAudiences(); }, []);
 
-    // --- Initialization ---
+    // --- Initialization (notes + publish activity) ---
     useEffect(() => {
+        if (!user) return;
         const init = async () => {
             try {
-                const userRes = await authApi.get('/auth/me');
-                if (userRes.data && userRes.data.id) setUser(userRes.data);
-
-                const [ghRes, drRes, jiraRes, linearRes, asanaRes, clickupRes, mondayRes] = await Promise.all([
-                    api.get('/tokens/github').catch(() => ({ data: { hasToken: false } })),
-                    api.get('/tokens/devrev').catch(() => ({ data: { hasToken: false } })),
-                    api.get('/tokens/jira').catch(() => ({ data: { hasToken: false } })),
-                    api.get('/tokens/linear').catch(() => ({ data: { hasToken: false } })),
-                    api.get('/tokens/asana').catch(() => ({ data: { hasToken: false } })),
-                    api.get('/tokens/clickup').catch(() => ({ data: { hasToken: false } })),
-                    api.get('/tokens/monday').catch(() => ({ data: { hasToken: false } })),
+                const activeProjectId = user.active_project_id;
+                const notesParams = activeProjectId ? { params: { projectId: activeProjectId } } : {};
+                const [notesRes, countRes, activityRes] = await Promise.all([
+                    api.get('/notes', notesParams),
+                    api.get('/notes/count'),
+                    api.get('/publish/activity'),
                 ]);
-
-                try {
-                    const tokensRes = await api.get('/tokens');
-                    const services = tokensRes.data.services || [];
-                    const SERVICE_LABELS = { github: 'GitHub', devrev: 'DevRev', jira: 'Jira', linear: 'Linear', asana: 'Asana', clickup: 'ClickUp', monday: 'Monday.com' };
-                    const formatted = services.map(s => SERVICE_LABELS[s] || s.charAt(0).toUpperCase() + s.slice(1));
-                    setConnectedIntegrations(formatted);
-                } catch (e) {
-                    console.error("Failed to fetch all tokens", e);
-                    toast.error('Failed to load connected integrations');
-                }
-
-                try {
-                    const activeProjectId = userRes.data.active_project_id;
-                    const notesParams = activeProjectId ? { params: { projectId: activeProjectId } } : {};
-                    const notesRes = await api.get('/notes', notesParams);
-                    setGeneratedNotes(notesRes.data.notes || []);
-                    const countRes = await api.get('/notes/count');
-                    setTotalNotesGenerated(countRes.data.count || 0);
-                } catch (e) {
-                    console.error("Failed to fetch notes", e);
-                    toast.error('Failed to load release notes');
-                }
-
-                try {
-                    const activityRes = await api.get('/publish/activity');
-                    setPublishEvents(activityRes.data.events || []);
-                    setPublishedCount(activityRes.data.publishedCount || 0);
-                } catch (e) {
-                    console.error("Failed to fetch publish activity", e);
-                    toast.error('Failed to load publish activity');
-                }
-
-                // Set default sources based on connected integrations
-                const defaultSources = [];
-                if (ghRes.data.hasToken) defaultSources.push('github');
-                if (drRes.data.hasToken) defaultSources.push('devrev');
-                if (jiraRes.data.hasToken) defaultSources.push('jira');
-                if (linearRes.data.hasToken) defaultSources.push('linear');
-                if (asanaRes.data.hasToken) defaultSources.push('asana');
-                if (clickupRes.data.hasToken) defaultSources.push('clickup');
-                if (mondayRes.data.hasToken) defaultSources.push('monday');
-                if (defaultSources.length > 0) setSources([defaultSources[0]]);
-                if (ghRes.data.hasToken) fetchRepos(selectedRepo, selectedBranch);
-                if (drRes.data.hasToken) fetchBoards(selectedBoard);
-                if (jiraRes.data.hasToken) fetchJiraProjects();
-                if (linearRes.data.hasToken) fetchLinearTeams();
-                if (asanaRes.data.hasToken) fetchAsanaWorkspaces();
-                if (clickupRes.data.hasToken) fetchClickUpWorkspaces();
-                if (mondayRes.data.hasToken) fetchMondayBoards();
-
-                setDashboardLoading(false);
+                setGeneratedNotes(notesRes.data.notes || []);
+                setTotalNotesGenerated(countRes.data.count || 0);
+                setPublishEvents(activityRes.data.events || []);
+                setPublishedCount(activityRes.data.publishedCount || 0);
             } catch (err) {
                 console.error("Dashboard Init Error", err);
-                toast.error('Failed to initialize dashboard');
-                setDashboardLoading(false);
+                toast.error('Failed to load dashboard data');
             }
         };
         init();
+    }, [user]);
+
+    // --- Mark dashboard ready once tokens are loaded ---
+    useEffect(() => {
+        if (!tokensLoading) setDashboardLoading(false);
+    }, [tokensLoading]);
+
+    // --- Fetch integration data only when user selects a source ---
+    useEffect(() => {
+        if (tokensLoading || sources.length === 0) return;
+        if (sources.includes('github') && connections.github && repos.length === 0) fetchRepos(selectedRepo, selectedBranch);
+        if (sources.includes('devrev') && connections.devrev && boards.length === 0) fetchBoards(selectedBoard);
+        if (sources.includes('jira') && connections.jira && jiraProjects.length === 0) fetchJiraProjects();
+        if (sources.includes('linear') && connections.linear && linearTeams.length === 0) fetchLinearTeams();
+        if (sources.includes('asana') && connections.asana && asanaWorkspaces.length === 0) fetchAsanaWorkspaces();
+        if (sources.includes('clickup') && connections.clickup && clickupWorkspaces.length === 0) fetchClickUpWorkspaces();
+        if (sources.includes('monday') && connections.monday && mondayBoards.length === 0) fetchMondayBoards();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [sources, tokensLoading]);
 
     // --- GitHub Logic ---
     const fetchRepos = async (initialRepo, initialBranch) => {

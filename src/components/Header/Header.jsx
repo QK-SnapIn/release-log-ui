@@ -4,6 +4,7 @@ import { ChevronDown, Check, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api, { authApi } from '../../lib/api';
 import { useEntitlements } from '../../hooks/useEntitlements';
+import { useUser } from '../../hooks/useUser';
 import './Header.css';
 
 const BellIcon = () => (
@@ -131,21 +132,9 @@ const ProjectSwitcher = () => {
 const TopBar = ({ title, sub, children }) => {
     const navigate = useNavigate();
     const { plan } = useEntitlements();
-    const [user, setUser] = useState(null);
+    const { user } = useUser();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const res = await authApi.get('/auth/me');
-                if (res.data && res.data.id) setUser(res.data);
-            } catch (error) {
-                console.error("Failed to fetch user", error);
-            }
-        };
-        fetchUser();
-    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -169,6 +158,7 @@ const TopBar = ({ title, sub, children }) => {
 
     const firstName = user?.name ? user.name.split(' ')[0] : 'User';
     const initial = firstName.charAt(0).toUpperCase();
+    const avatarSrc = user?.avatar_url || user?.avatar;
 
     return (
         <header className="topbar">
@@ -192,8 +182,8 @@ const TopBar = ({ title, sub, children }) => {
                 {/* User */}
                 <div className="topbar-user-wrapper" ref={dropdownRef}>
                     <div className="topbar-user" onClick={() => setDropdownOpen(!dropdownOpen)}>
-                        {user?.avatar ? (
-                            <img src={user.avatar} alt="avatar" className="topbar-avatar-img" />
+                        {avatarSrc ? (
+                            <img src={avatarSrc} alt="avatar" className="topbar-avatar-img" />
                         ) : (
                             <div className="topbar-avatar">{initial}</div>
                         )}

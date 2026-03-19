@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { authApi } from '../../lib/api';
+import { useUser } from '../../hooks/useUser';
 import logo from '../../assets/logos/releaslyy-logo-main.png';
 import './Sidebar.css';
 
@@ -41,17 +40,11 @@ const staticNavItems = [
 
 const Sidebar = () => {
     const navigate = useNavigate();
-    const [userId, setUserId] = useState(null);
-
-    useEffect(() => {
-        authApi.get('/auth/me')
-            .then(res => { if (res.data?.id) setUserId(res.data.id); })
-            .catch(() => {});
-    }, []);
+    const { user } = useUser();
 
     const navItems = [
         ...staticNavItems,
-        ...(userId ? [{ to: `/changelog/${userId}`, icon: icons.changelog, label: 'Changelog' }] : []),
+        ...(user?.id ? [{ to: `/changelog/${user.id}`, icon: icons.changelog, label: 'Changelog' }] : []),
     ];
 
     return (

@@ -1,26 +1,11 @@
-import { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { authApi } from '../lib/api';
+import { useUser } from '../hooks/useUser';
 
 const ProtectedRoute = ({ children }) => {
-    const [status, setStatus] = useState('loading'); // loading | authenticated | unauthenticated
+    const { user, loading } = useUser();
     const location = useLocation();
 
-    useEffect(() => {
-        authApi.get('/auth/me')
-            .then(res => {
-                if (res.data && res.data.id) {
-                    setStatus('authenticated');
-                } else {
-                    setStatus('unauthenticated');
-                }
-            })
-            .catch(() => {
-                setStatus('unauthenticated');
-            });
-    }, []);
-
-    if (status === 'loading') {
+    if (loading) {
         return (
             <div style={{
                 display: 'flex',
@@ -35,8 +20,7 @@ const ProtectedRoute = ({ children }) => {
         );
     }
 
-    if (status === 'unauthenticated') {
-        // Pass the intended destination as a query param so we can redirect after login
+    if (!user) {
         return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />;
     }
 

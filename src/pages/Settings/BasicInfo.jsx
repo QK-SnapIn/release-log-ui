@@ -3,8 +3,10 @@ import { Camera, Check, Lock, Eye, EyeOff, AlertTriangle, Trash2, Loader2 } from
 import toast from 'react-hot-toast';
 import SearchDropdown from '../../components/ui/SearchDropdown';
 import api from '../../lib/api';
+import { useUser } from '../../hooks/useUser';
 
 export default function BasicInfo() {
+  const { refetchUser } = useUser();
   const [profile, setProfile] = useState({ name: '', email: '', company: '', role: '', avatar: '' });
   const [hasPassword, setHasPassword] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -65,6 +67,7 @@ export default function BasicInfo() {
         role: data.role || '',
         avatar: data.avatar || '',
       });
+      await refetchUser();
       toast.success('Profile saved');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to save');

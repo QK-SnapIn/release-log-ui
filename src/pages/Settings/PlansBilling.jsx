@@ -3,8 +3,9 @@ import { Check, Zap, Star, Users, ExternalLink, Download, Loader2 } from 'lucide
 import toast from 'react-hot-toast';
 import { useEntitlements } from '../../hooks/useEntitlements';
 import { useRazorpay } from '../../hooks/useRazorpay';
+import { useUser } from '../../hooks/useUser';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
-import api, { authApi } from '../../lib/api';
+import api from '../../lib/api';
 import { buildFeatures } from '../../lib/planFeatures';
 
 function detectCurrency() {
@@ -28,11 +29,11 @@ const statusColors = {
 export default function PlansBilling() {
   const { plan, entitlements, usage, subscription: entSub, canUse, refetch: refetchEntitlements } = useEntitlements();
   const { openCheckout } = useRazorpay();
+  const { user } = useUser();
   const [plans, setPlans] = useState([]);
   const [subscription, setSubscription] = useState(null);
   const [billing, setBilling] = useState({ billingName: '', billingEmail: '', billingPhone: '', billingAddress: '' });
   const [invoices, setInvoices] = useState([]);
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [billingSaving, setBillingSaving] = useState(false);
   const [subscribing, setSubscribing] = useState(null);
@@ -46,16 +47,14 @@ export default function PlansBilling() {
   useEffect(() => {
     async function load() {
       try {
-        const [plansRes, subRes, billRes, invRes, meRes] = await Promise.all([
+        const [plansRes, subRes, billRes, invRes] = await Promise.all([
           api.get('/plans'),
           api.get('/plans/my-subscription'),
           api.get('/plans/billing'),
           api.get('/plans/invoices'),
-          authApi.get('/auth/me'),
         ]);
         setPlans(plansRes.data || []);
         setSubscription(subRes.data);
-        if (meRes.data) setUser(meRes.data);
         if (billRes.data) {
           setBilling({
             billingName: billRes.data.billing_name || '',

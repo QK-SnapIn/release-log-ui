@@ -1,13 +1,11 @@
-import { useState, useEffect } from 'react';
 import { Link2, Clock, FileText, RefreshCw, Github } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useTokens } from '../../hooks/useTokens';
 import devrevLogo from '../../assets/devrev-logo.webp';
 import jiraLogo from '../../assets/jira_logo.webp';
 import linearLogo from '../../assets/linear-logo.svg';
 import asanaLogo from '../../assets/asana-logo.svg';
 import clickupLogo from '../../assets/clickup-logo.svg';
 import mondayLogo from '../../assets/monday-logo.svg';
-import api from '../../lib/api';
 
 const integrationDefs = [
   {
@@ -69,21 +67,7 @@ const integrationDefs = [
 ];
 
 export default function SettingsIntegrations() {
-  const [connections, setConnections] = useState({});
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await api.get('/tokens');
-        const map = {};
-        (res.data || []).forEach(t => { map[t.service] = true; });
-        setConnections(map);
-      } catch (err) {
-        toast.error(err.response?.data?.error || 'Failed to load integrations');
-      }
-    }
-    load();
-  }, []);
+  const { connections } = useTokens();
 
   return (
     <div className="tab-content">

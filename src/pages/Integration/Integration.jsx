@@ -18,6 +18,7 @@ import mondayLogo from '../../assets/monday-logo.svg';
 import './Integration.css';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import api from '../../lib/api';
+import { useTokens } from '../../hooks/useTokens';
 
 /* ── Micro Icons ── */
 const ghIcon = <svg width="18" height="18" fill="none" viewBox="0 0 18 18"><path d="M9 1.5A7.5 7.5 0 006.63 16.11c.375.068.513-.163.513-.36v-1.357c-2.09.454-2.531-.99-2.531-.99a1.987 1.987 0 00-.836-1.099c-.682-.465.052-.457.052-.457a1.575 1.575 0 011.147.772 1.597 1.597 0 002.183.623 1.597 1.597 0 01.476-1.002c-1.669-.187-3.424-.833-3.424-3.708a2.903 2.903 0 01.773-2.014 2.7 2.7 0 01.075-1.987s.63-.203 2.063.769a7.125 7.125 0 013.75 0c1.432-.972 2.062-.769 2.062-.769a2.7 2.7 0 01.076 1.987 2.895 2.895 0 01.772 2.014c0 2.884-1.76 3.517-3.434 3.704a1.8 1.8 0 01.51 1.391v2.063c0 .199.135.437.518.357A7.5 7.5 0 009 1.5z" fill="currentColor"/></svg>;
@@ -345,10 +346,11 @@ const SiteSelectModal = ({ sites, loading, onSelect, onClose }) => {
 
 /* ── Main Integration page ── */
 const Integration = () => {
+    const { connections: sharedConnections, loading: tokensLoading } = useTokens();
     const [connections, setConnections] = useState({});
     const [loadingState, setLoadingState] = useState({});
     const [errorState, setErrorState] = useState({});
-    const [initialLoading, setInitialLoading] = useState(true);
+    const initialLoading = tokensLoading;
     const [editingIntegration, setEditingIntegration] = useState(null);
     const [modalMode, setModalMode] = useState('edit'); // 'connect' | 'edit'
     const [deletingIntegration, setDeletingIntegration] = useState(null);
@@ -357,38 +359,10 @@ const Integration = () => {
     const [jiraSites, setJiraSites] = useState(null); // for multi-site selection
     const [siteSelectLoading, setSiteSelectLoading] = useState(false);
 
+    // Sync local connections from shared context
     useEffect(() => {
-        const checkTokens = async () => {
-            try {
-                const [ghRes, drRes, jiraRes, slackRes, linearRes, asanaRes, clickupRes, mondayRes] = await Promise.all([
-                    api.get('/tokens/github'),
-                    api.get('/tokens/devrev'),
-                    api.get('/tokens/jira'),
-                    api.get('/tokens/slack'),
-                    api.get('/tokens/linear'),
-                    api.get('/tokens/asana'),
-                    api.get('/tokens/clickup'),
-                    api.get('/tokens/monday'),
-                ]);
-                setConnections({
-                    github: ghRes.data.hasToken,
-                    devrev: drRes.data.hasToken,
-                    jira: jiraRes.data.hasToken,
-                    slack: slackRes.data.hasToken,
-                    linear: linearRes.data.hasToken,
-                    asana: asanaRes.data.hasToken,
-                    clickup: clickupRes.data.hasToken,
-                    monday: mondayRes.data.hasToken,
-                });
-            } catch (err) {
-                console.error('Token check failed', err);
-                toast.error('Failed to check integration status');
-            } finally {
-                setInitialLoading(false);
-            }
-        };
-        checkTokens();
-    }, []);
+        if (!tokensLoading) setConnections(sharedConnections);
+    }, [sharedConnections, tokensLoading]);
 
     // Handle Jira OAuth callback redirect
     useEffect(() => {
