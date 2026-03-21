@@ -81,8 +81,8 @@ export default function BasicInfo() {
       toast.error('Passwords do not match');
       return;
     }
-    if (pwForm.newPw.length < 8) {
-      toast.error('Password must be at least 8 characters');
+    if (pwForm.newPw.length < 8 || pwForm.newPw.length > 32) {
+      toast.error('Password must be between 8 and 32 characters');
       return;
     }
     setPwSaving(true);
@@ -159,12 +159,12 @@ export default function BasicInfo() {
         <div className="form-row">
           <div className="form-group">
             <label className="form-label">Full Name</label>
-            <input className="form-input" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} />
+            <input className="form-input" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} maxLength={100} />
           </div>
           <div className="form-group">
             <label className="form-label">Email</label>
             <div style={{ position: 'relative' }}>
-              <input className="form-input" value={profile.email} onChange={e => setProfile(p => ({ ...p, email: e.target.value }))} style={{ paddingRight: 80 }} />
+              <input className="form-input" value={profile.email} onChange={e => setProfile(p => ({ ...p, email: e.target.value }))} style={{ paddingRight: 80 }} maxLength={254} />
               <span className="s-badge s-badge-green" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)' }}>Verified</span>
             </div>
           </div>
@@ -172,7 +172,7 @@ export default function BasicInfo() {
         <div className="form-row">
           <div className="form-group">
             <label className="form-label">Company</label>
-            <input className="form-input" placeholder="Your organization" value={profile.company} onChange={e => setProfile(p => ({ ...p, company: e.target.value }))} />
+            <input className="form-input" placeholder="Your organization" value={profile.company} onChange={e => setProfile(p => ({ ...p, company: e.target.value }))} maxLength={100} />
           </div>
           <div className="form-group">
             <label className="form-label">Role</label>
@@ -210,7 +210,8 @@ export default function BasicInfo() {
                 type={showPw[key] ? 'text' : 'password'}
                 placeholder="••••••••"
                 value={pwForm[key]}
-                onChange={e => setPwForm(p => ({ ...p, [key]: e.target.value }))}
+                onChange={e => setPwForm(p => ({ ...p, [key]: e.target.value.replace(/\s/g, '') }))}
+                maxLength={32}
               />
               <button className="input-toggle" onClick={() => setShowPw(p => ({ ...p, [key]: !p[key] }))}>
                 {showPw[key] ? <EyeOff /> : <Eye />}

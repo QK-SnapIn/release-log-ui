@@ -35,7 +35,8 @@ function PlanCard({ plan, isAnnual, currency, onAction }) {
   const priceUsd = isAnnual ? plan.price_usd_annual : plan.price_usd_monthly;
   const priceRaw = currency === 'INR' ? priceInr : priceUsd;
   // Prices stored in smallest unit (paise/cents) — convert to display
-  const price = priceRaw != null ? (priceRaw / 100) : null;
+  // -1 means "custom pricing" (enterprise)
+  const price = priceRaw != null && priceRaw >= 0 ? (priceRaw / 100) : null;
   const symbol = currency === 'INR' ? '₹' : '$';
   const isComingSoon = plan.status === 'coming_soon';
   const features = buildFeatures(plan.entitlements);
@@ -299,9 +300,6 @@ export default function PricingPage() {
         {/* Bottom note */}
         <div style={{ textAlign: 'center', marginTop: 40 }}>
           <p style={{ fontSize: 14, color: '#a8a29e', lineHeight: 1.6, margin: '0 0 8px' }}>
-            All paid plans include a 14-day free trial. No credit card required to start.
-          </p>
-          <p style={{ fontSize: 14, color: '#a8a29e', lineHeight: 1.6, margin: 0 }}>
             Questions? Reach out at{' '}
             <a href="mailto:hello@releaslyy.com" style={{ color: '#4a80f0', textDecoration: 'none' }}>hello@releaslyy.com</a>
           </p>
@@ -315,7 +313,6 @@ export default function PricingPage() {
           {[
             { q: 'What happens when I hit the free plan limit?', a: "You'll still have access to all your existing release notes. You just won't be able to generate new ones until the next month, or until you upgrade to Pro." },
             { q: 'Can I use my own API key on the free plan?', a: 'BYOK (Bring Your Own Key) is a Pro feature. The free plan uses Releaslyy AI, our built-in model that requires no API key.' },
-            { q: "What's included in the 14-day trial?", a: 'The full Pro plan — unlimited generations, all integrations, multi-source, publish-back, and BYOK. No credit card needed to start.' },
             { q: 'Can I cancel anytime?', a: "Yes. Cancel from your Settings page at any time. You'll keep access until the end of your billing period." },
             { q: "Does Pro include Slack publishing?", a: "Yes! Slack is fully supported. Connect your workspace, pick a channel, and publish — as full release notes or an AI-generated summary with a link to the public changelog." },
             { q: 'When will Team and Enterprise plans be available?', a: "We're building team collaboration features now. Join the waitlist and we'll notify you as soon as they're ready." },

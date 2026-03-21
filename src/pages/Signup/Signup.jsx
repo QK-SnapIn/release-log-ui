@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authApi } from '../../lib/api';
 import SEO from '../../components/SEO';
@@ -12,13 +12,14 @@ const Signup = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
     if (!name.trim()) return toast.error('Name is required');
     if (!email.trim()) return toast.error('Email is required');
-    if (password.length < 8) return toast.error('Password must be at least 8 characters');
+    if (password.length < 8 || password.length > 32) return toast.error('Password must be between 8 and 32 characters');
 
     setLoading(true);
     try {
@@ -72,6 +73,7 @@ const Signup = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoComplete="name"
+                maxLength={100}
               />
             </div>
             <div className="form-field">
@@ -82,17 +84,24 @@ const Signup = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
+                maxLength={254}
               />
             </div>
             <div className="form-field">
               <label>Password</label>
-              <input
-                type="password"
-                placeholder="Min 8 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-              />
+              <div className="input-wrap">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Min 8 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value.replace(/\s/g, ''))}
+                  autoComplete="new-password"
+                  maxLength={32}
+                />
+                <button type="button" className="input-toggle" onClick={() => setShowPassword(p => !p)}>
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
             </div>
             <button type="submit" className="signup-submit-btn" disabled={loading}>
               {loading ? 'Creating account...' : 'Create account'}

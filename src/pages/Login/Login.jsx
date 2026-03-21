@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { authApi } from '../../lib/api';
@@ -11,6 +11,7 @@ const Login = () => {
     const [searchParams] = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [needsVerification, setNeedsVerification] = useState(false);
     const [verificationEmail, setVerificationEmail] = useState('');
@@ -94,13 +95,18 @@ const Login = () => {
                         </div>
                         <div className="form-field">
                             <label>Password</label>
-                            <input
-                                type="password"
-                                placeholder="Your password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                autoComplete="current-password"
-                            />
+                            <div className="input-wrap">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    placeholder="Your password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value.replace(/\s/g, ''))}
+                                    autoComplete="current-password"
+                                />
+                                <button type="button" className="input-toggle" onClick={() => setShowPassword(p => !p)}>
+                                    {showPassword ? <EyeOff /> : <Eye />}
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" className="email-login-btn" disabled={loading}>
                             {loading ? 'Signing in...' : 'Sign in'}

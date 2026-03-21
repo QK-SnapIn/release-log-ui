@@ -244,7 +244,7 @@ export default function PlansBilling() {
           const priceRaw = currency === 'INR'
             ? (isAnnual ? p.price_inr_annual : p.price_inr_monthly)
             : (isAnnual ? p.price_usd_annual : p.price_usd_monthly);
-          const price = (priceRaw != null && !isNaN(priceRaw)) ? priceRaw / 100 : 0;
+          const price = (priceRaw != null && !isNaN(priceRaw) && priceRaw >= 0) ? priceRaw / 100 : null;
           const symbol = currency === 'INR' ? '₹' : '$';
           const isComingSoon = p.status === 'coming_soon';
 
@@ -253,7 +253,7 @@ export default function PlansBilling() {
               {isActive && <div className="current-badge">Current</div>}
               <div className="plan-icon" style={{ background: isActive ? color : '#f5f5f4', color: isActive ? '#fff' : '#78716c' }}>{icon}</div>
               <div className="plan-name">{p.display_name}</div>
-              <div className="plan-price">{symbol}{price}<span>/month</span></div>
+              <div className="plan-price">{price !== null ? <>{symbol}{price}<span>/month</span></> : 'Custom'}</div>
               <ul className="plan-features">
                 {features.map(f => <li key={f.text}><Check /> {f.text}</li>)}
               </ul>

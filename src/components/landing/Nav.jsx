@@ -20,7 +20,16 @@ export default function Nav() {
   }, []);
 
   const handleNav = (href, isPage) => {
-    if (isPage) { navigate(href); } else { window.location.hash = href.replace('#', ''); }
+    if (isPage) {
+      navigate(href);
+    } else {
+      const onLanding = window.location.pathname === '/';
+      if (onLanding) {
+        window.location.hash = href.replace('#', '');
+      } else {
+        navigate('/' + href);
+      }
+    }
     setMenuOpen(false);
   };
 

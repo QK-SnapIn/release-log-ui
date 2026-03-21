@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Check, Plus } from 'lucide-react';
+import { ChevronDown, Check, Plus, Bug } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api, { authApi } from '../../lib/api';
 import { useEntitlements } from '../../hooks/useEntitlements';
@@ -169,6 +169,20 @@ const TopBar = ({ title, sub, children }) => {
             </div>
             <div className="topbar-right">
                 {children}
+
+                {/* Bug Report */}
+                {import.meta.env.VITE_BUG_REPORT_URL && (
+                    <a
+                        href={import.meta.env.VITE_BUG_REPORT_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-icon"
+                        title="Report a bug"
+                        style={{ color: 'var(--muted)', padding: 6 }}
+                    >
+                        <Bug size={18} />
+                    </a>
+                )}
 
                 {/* Bell */}
                 <div className="topbar-bell">

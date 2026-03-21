@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authApi } from '../../lib/api';
 import SEO from '../../components/SEO';
@@ -13,6 +13,8 @@ const ResetPassword = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const inputRefs = useRef([]);
@@ -56,7 +58,7 @@ const ResetPassword = () => {
     e.preventDefault();
     const code = otp.join('');
     if (code.length !== 6) return toast.error('Please enter the 6-digit code');
-    if (newPassword.length < 8) return toast.error('Password must be at least 8 characters');
+    if (newPassword.length < 8 || newPassword.length > 32) return toast.error('Password must be between 8 and 32 characters');
     if (newPassword !== confirmPassword) return toast.error('Passwords do not match');
 
     setLoading(true);
@@ -116,24 +118,36 @@ const ResetPassword = () => {
 
           <div className="form-field">
             <label>New password</label>
-            <input
-              type="password"
-              placeholder="Min 8 characters"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              autoComplete="new-password"
-            />
+            <div className="input-wrap">
+              <input
+                type={showNewPw ? 'text' : 'password'}
+                placeholder="Min 8 characters"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value.replace(/\s/g, ''))}
+                autoComplete="new-password"
+                maxLength={32}
+              />
+              <button type="button" className="input-toggle" onClick={() => setShowNewPw(p => !p)}>
+                {showNewPw ? <EyeOff /> : <Eye />}
+              </button>
+            </div>
           </div>
 
           <div className="form-field">
             <label>Confirm password</label>
-            <input
-              type="password"
-              placeholder="Confirm your password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-            />
+            <div className="input-wrap">
+              <input
+                type={showConfirmPw ? 'text' : 'password'}
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value.replace(/\s/g, ''))}
+                autoComplete="new-password"
+                maxLength={32}
+              />
+              <button type="button" className="input-toggle" onClick={() => setShowConfirmPw(p => !p)}>
+                {showConfirmPw ? <EyeOff /> : <Eye />}
+              </button>
+            </div>
           </div>
 
           {confirmPassword && newPassword !== confirmPassword && (

@@ -226,3 +226,22 @@ label,
   color: var(--text);
   font-size: 0.875rem;
 }
+
+/* ── Password toggle (eye icon) ── */
+.input-wrap {
+  position: relative;
+}
+.input-wrap input { padding-right: 40px; }
+.input-toggle {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  display: flex;
+  transition: color 0.15s;
+}
+.input-toggle:hover { color: var(--text); }
+.input-toggle svg { width: 16px; height: 16px; }
