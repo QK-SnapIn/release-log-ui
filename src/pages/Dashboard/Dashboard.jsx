@@ -168,6 +168,29 @@ const Dashboard = () => {
     const [mondaySelectedItems, setMondaySelectedItems] = useState([]);
     const [mondayItemSearch, setMondayItemSearch] = useState('');
 
+    // -- Pagination State --
+    const [ghHasMore, setGhHasMore] = useState(false);
+    const [ghNextPage, setGhNextPage] = useState(null);
+    const [ghLoadingMore, setGhLoadingMore] = useState(false);
+    const [jiraHasMore, setJiraHasMore] = useState(false);
+    const [jiraNextCursor, setJiraNextCursor] = useState(null);
+    const [jiraLoadingMore, setJiraLoadingMore] = useState(false);
+    const [devrevHasMore, setDevrevHasMore] = useState(false);
+    const [devrevNextCursor, setDevrevNextCursor] = useState(null);
+    const [devrevLoadingMore, setDevrevLoadingMore] = useState(false);
+    const [linearHasMore, setLinearHasMore] = useState(false);
+    const [linearNextCursor, setLinearNextCursor] = useState(null);
+    const [linearLoadingMore, setLinearLoadingMore] = useState(false);
+    const [asanaHasMore, setAsanaHasMore] = useState(false);
+    const [asanaNextCursor, setAsanaNextCursor] = useState(null);
+    const [asanaLoadingMore, setAsanaLoadingMore] = useState(false);
+    const [clickupHasMore, setClickupHasMore] = useState(false);
+    const [clickupNextPage, setClickupNextPage] = useState(null);
+    const [clickupLoadingMore, setClickupLoadingMore] = useState(false);
+    const [mondayHasMore, setMondayHasMore] = useState(false);
+    const [mondayNextCursor, setMondayNextCursor] = useState(null);
+    const [mondayLoadingMore, setMondayLoadingMore] = useState(false);
+
     // -- Shared Gen State --
     const [audience, setAudience] = useState(() => sessionStorage.getItem('shared_audience') || 'qa');
     const [releaseTitle, setReleaseTitle] = useState('');
@@ -314,7 +337,7 @@ const Dashboard = () => {
         try {
             const params = { owner, repo: repoName, base: branch, state: 'closed' };
             const res = await api.get('/github/pulls', { params });
-            let fetched = res.data;
+            let fetched = res.data.pulls || res.data;
             if (dateRangeObj?.startDate && dateRangeObj?.endDate) {
                 const start = new Date(dateRangeObj.startDate);
                 const end = new Date(dateRangeObj.endDate);
@@ -324,9 +347,34 @@ const Dashboard = () => {
                 });
             }
             setCommits(fetched);
+            setGhHasMore(res.data.hasMore || false);
+            setGhNextPage(res.data.nextPage || null);
             if (autoSelectAll) setSelectedCommits(fetched.map(c => c.id));
         } catch (err) { console.error("GH fetchCommits", err); toast.error('Failed to load pull requests'); }
         finally { setLoadingData(false); }
+    };
+
+    const loadMoreCommits = async () => {
+        if (!ghNextPage || ghLoadingMore) return;
+        setGhLoadingMore(true);
+        const [owner, repoName] = selectedRepo.split('/');
+        try {
+            const params = { owner, repo: repoName, base: selectedBranch, state: 'closed', page: ghNextPage };
+            const res = await api.get('/github/pulls', { params });
+            let fetched = res.data.pulls || res.data;
+            if (dateRange?.startDate && dateRange?.endDate) {
+                const start = new Date(dateRange.startDate);
+                const end = new Date(dateRange.endDate);
+                fetched = fetched.filter(pr => {
+                    const mergedDate = new Date(pr.merged_at);
+                    return mergedDate >= start && mergedDate <= end;
+                });
+            }
+            setCommits(prev => [...prev, ...fetched]);
+            setGhHasMore(res.data.hasMore || false);
+            setGhNextPage(res.data.nextPage || null);
+        } catch (err) { console.error("GH loadMore", err); toast.error('Failed to load more pull requests'); }
+        finally { setGhLoadingMore(false); }
     };
 
     const handleToggleCommit = (id) => {
@@ -393,8 +441,22 @@ const Dashboard = () => {
         try {
             const res = await api.post('/devrev/sprint-items', { sprintIds });
             setDevrevItems(res.data.items || []);
+            setDevrevHasMore(res.data.hasMore || false);
+            setDevrevNextCursor(res.data.nextCursor || null);
         } catch (err) { console.error("DR fetchItems", err); toast.error('Failed to load DevRev work items'); }
         finally { setLoadingData(false); }
+    };
+
+    const loadMoreDevrevItems = async () => {
+        if (!devrevNextCursor || devrevLoadingMore) return;
+        setDevrevLoadingMore(true);
+        try {
+            const res = await api.post('/devrev/sprint-items', { sprintIds: selectedSprints.map(s => s.id), cursor: devrevNextCursor });
+            setDevrevItems(prev => [...prev, ...(res.data.items || [])]);
+            setDevrevHasMore(res.data.hasMore || false);
+            setDevrevNextCursor(res.data.nextCursor || null);
+        } catch (err) { console.error("DR loadMore", err); toast.error('Failed to load more DevRev items'); }
+        finally { setDevrevLoadingMore(false); }
     };
 
     const handleToggleDevrevItem = (item) => {
@@ -503,6 +565,8 @@ const Dashboard = () => {
             if (res.data.kanban || (res.data.sprints || []).length === 0) {
                 const issueRes = await api.get('/jira/board-issues', { params: { boardId: board.id } });
                 setJiraIssues(issueRes.data.issues || []);
+                setJiraHasMore(issueRes.data.hasMore || false);
+                setJiraNextCursor(issueRes.data.nextCursor || null);
             } else {
                 const sprints = res.data.sprints || [];
                 setJiraSprints(sprints);
@@ -526,6 +590,9 @@ const Dashboard = () => {
             const seen = new Set();
             const unique = allIssues.filter(i => { if (seen.has(i.id)) return false; seen.add(i.id); return true; });
             setJiraIssues(unique);
+            const lastResult = results[results.length - 1]?.data;
+            setJiraHasMore(lastResult?.hasMore || false);
+            setJiraNextCursor(lastResult?.nextCursor || null);
         } catch (err) { console.error("Jira fetchIssues", err); toast.error('Failed to load Jira issues'); }
         finally { setLoadingData(false); }
     };
@@ -543,6 +610,9 @@ const Dashboard = () => {
             const seen = new Set();
             const unique = allIssues.filter(i => { if (seen.has(i.id)) return false; seen.add(i.id); return true; });
             setJiraIssues(unique);
+            const lastResult = results[results.length - 1]?.data;
+            setJiraHasMore(lastResult?.hasMore || false);
+            setJiraNextCursor(lastResult?.nextCursor || null);
         } catch (err) { console.error("Jira fetchVersionIssues", err); toast.error('Failed to load version issues'); }
         finally { setLoadingData(false); }
     };
@@ -599,6 +669,29 @@ const Dashboard = () => {
         return searchMatch && filterMatch;
     });
 
+    const loadMoreJiraIssues = async () => {
+        if (!jiraNextCursor || jiraLoadingMore) return;
+        setJiraLoadingMore(true);
+        try {
+            let endpoint, params;
+            if (jiraMode === 'version' && jiraSelectedVersions.length > 0) {
+                endpoint = '/jira/version-issues';
+                params = { versionId: jiraSelectedVersions[jiraSelectedVersions.length - 1], startAt: jiraNextCursor };
+            } else if (jiraSelectedSprints.length > 0) {
+                endpoint = '/jira/sprint-issues';
+                params = { sprintId: jiraSelectedSprints[jiraSelectedSprints.length - 1], startAt: jiraNextCursor };
+            } else if (jiraSelectedBoard) {
+                endpoint = '/jira/board-issues';
+                params = { boardId: jiraSelectedBoard.id, startAt: jiraNextCursor };
+            } else return;
+            const res = await api.get(endpoint, { params });
+            setJiraIssues(prev => [...prev, ...(res.data.issues || [])]);
+            setJiraHasMore(res.data.hasMore || false);
+            setJiraNextCursor(res.data.nextCursor || null);
+        } catch (err) { console.error("Jira loadMore", err); toast.error('Failed to load more Jira issues'); }
+        finally { setJiraLoadingMore(false); }
+    };
+
     // --- Linear Logic ---
     const fetchLinearTeams = async () => {
         try {
@@ -645,8 +738,25 @@ const Dashboard = () => {
             if (projectId) params.projectId = projectId;
             const res = await api.get('/linear/issues', { params });
             setLinearIssues(res.data.issues || []);
+            setLinearHasMore(res.data.hasMore || false);
+            setLinearNextCursor(res.data.nextCursor || null);
         } catch (err) { console.error("Linear fetchIssues", err); toast.error('Failed to load Linear issues'); }
         finally { setLoadingData(false); }
+    };
+
+    const loadMoreLinearIssues = async () => {
+        if (!linearNextCursor || linearLoadingMore) return;
+        setLinearLoadingMore(true);
+        try {
+            const params = { teamId: linearSelectedTeam.id, cursor: linearNextCursor };
+            if (linearSelectedCycle) params.cycleId = linearSelectedCycle;
+            if (linearSelectedProject) params.projectId = linearSelectedProject;
+            const res = await api.get('/linear/issues', { params });
+            setLinearIssues(prev => [...prev, ...(res.data.issues || [])]);
+            setLinearHasMore(res.data.hasMore || false);
+            setLinearNextCursor(res.data.nextCursor || null);
+        } catch (err) { console.error("Linear loadMore", err); toast.error('Failed to load more Linear issues'); }
+        finally { setLinearLoadingMore(false); }
     };
 
     const handleSelectLinearProjectOrCycle = (projectId, cycleId) => {
@@ -712,6 +822,8 @@ const Dashboard = () => {
             ]);
             setAsanaSections(secRes.data.sections || []);
             setAsanaTasks(taskRes.data.tasks || []);
+            setAsanaHasMore(taskRes.data.hasMore || false);
+            setAsanaNextCursor(taskRes.data.nextCursor || null);
         } catch (err) { console.error("Asana fetchSections/tasks", err); toast.error('Failed to load Asana tasks'); }
         finally { setLoadingData(false); }
     };
@@ -723,6 +835,8 @@ const Dashboard = () => {
         try {
             const res = await api.get('/asana/tasks', { params: { projectId: asanaSelectedProject.gid, sectionId: section.gid } });
             setAsanaTasks(res.data.tasks || []);
+            setAsanaHasMore(res.data.hasMore || false);
+            setAsanaNextCursor(res.data.nextCursor || null);
         } catch (err) { console.error("Asana fetchTasks", err); toast.error('Failed to load Asana tasks'); }
         finally { setLoadingData(false); }
     };
@@ -741,6 +855,20 @@ const Dashboard = () => {
     const filteredAsanaTasks = asanaTasks.filter(t =>
         (t.title || '').toLowerCase().includes(asanaTaskSearch.toLowerCase())
     );
+
+    const loadMoreAsanaTasks = async () => {
+        if (!asanaNextCursor || asanaLoadingMore) return;
+        setAsanaLoadingMore(true);
+        try {
+            const params = { projectId: asanaSelectedProject.gid, cursor: asanaNextCursor };
+            if (asanaSelectedSection) params.sectionId = asanaSelectedSection.gid;
+            const res = await api.get('/asana/tasks', { params });
+            setAsanaTasks(prev => [...prev, ...(res.data.tasks || [])]);
+            setAsanaHasMore(res.data.hasMore || false);
+            setAsanaNextCursor(res.data.nextCursor || null);
+        } catch (err) { console.error("Asana loadMore", err); toast.error('Failed to load more Asana tasks'); }
+        finally { setAsanaLoadingMore(false); }
+    };
 
     // --- ClickUp Logic ---
     const fetchClickUpWorkspaces = async () => {
@@ -794,8 +922,22 @@ const Dashboard = () => {
         try {
             const res = await api.get('/clickup/tasks', { params: { listId: list.id } });
             setClickupTasks(res.data.tasks || []);
+            setClickupHasMore(res.data.hasMore || false);
+            setClickupNextPage(res.data.nextPage || null);
         } catch (err) { console.error("ClickUp fetchTasks", err); toast.error('Failed to load ClickUp tasks'); }
         finally { setLoadingData(false); }
+    };
+
+    const loadMoreClickUpTasks = async () => {
+        if (clickupNextPage === null || clickupLoadingMore) return;
+        setClickupLoadingMore(true);
+        try {
+            const res = await api.get('/clickup/tasks', { params: { listId: clickupSelectedList.id, page: clickupNextPage } });
+            setClickupTasks(prev => [...prev, ...(res.data.tasks || [])]);
+            setClickupHasMore(res.data.hasMore || false);
+            setClickupNextPage(res.data.nextPage || null);
+        } catch (err) { console.error("ClickUp loadMore", err); toast.error('Failed to load more ClickUp tasks'); }
+        finally { setClickupLoadingMore(false); }
     };
 
     const handleToggleClickUpTask = (task) => {
@@ -837,6 +979,8 @@ const Dashboard = () => {
             ]);
             setMondayGroups(grpRes.data.groups || []);
             setMondayItems(itemRes.data.items || []);
+            setMondayHasMore(itemRes.data.hasMore || false);
+            setMondayNextCursor(itemRes.data.nextCursor || null);
         } catch (err) { console.error("Monday fetchGroups/items", err); toast.error('Failed to load Monday.com data'); }
         finally { setLoadingData(false); }
     };
@@ -848,8 +992,22 @@ const Dashboard = () => {
         try {
             const res = await api.get('/monday/items', { params: { boardId: mondaySelectedBoard.id, groupId: group.id } });
             setMondayItems(res.data.items || []);
+            setMondayHasMore(res.data.hasMore || false);
+            setMondayNextCursor(res.data.nextCursor || null);
         } catch (err) { console.error("Monday fetchItems", err); toast.error('Failed to load Monday.com items'); }
         finally { setLoadingData(false); }
+    };
+
+    const loadMoreMondayItems = async () => {
+        if (!mondayNextCursor || mondayLoadingMore) return;
+        setMondayLoadingMore(true);
+        try {
+            const res = await api.get('/monday/items', { params: { boardId: mondaySelectedBoard.id, cursor: mondayNextCursor } });
+            setMondayItems(prev => [...prev, ...(res.data.items || [])]);
+            setMondayHasMore(res.data.hasMore || false);
+            setMondayNextCursor(res.data.nextCursor || null);
+        } catch (err) { console.error("Monday loadMore", err); toast.error('Failed to load more Monday.com items'); }
+        finally { setMondayLoadingMore(false); }
     };
 
     const handleToggleMondayItem = (item) => {
@@ -1390,6 +1548,9 @@ const Dashboard = () => {
                                         setDateRange={setDateRange}
                                         onBack={() => setStep(2)}
                                         showBackButton
+                                        hasMore={ghHasMore}
+                                        onLoadMore={loadMoreCommits}
+                                        loadingMore={ghLoadingMore}
                                     />
                                 ) : (sources.length === 1 ? sources[0] : sourceTab) === 'jira' && sources.includes('jira') ? (
                                     <div className="selector-card-v2 selector-jira-wrap">
@@ -1595,6 +1756,11 @@ const Dashboard = () => {
                                                             );
                                                         })}
                                                     </div>
+                                                    {jiraHasMore && (
+                                                        <button className="btn btn-sm btn-secondary" onClick={loadMoreJiraIssues} disabled={jiraLoadingMore} style={{ width: '100%', marginTop: 8 }}>
+                                                            {jiraLoadingMore ? 'Loading...' : 'Load More'}
+                                                        </button>
+                                                    )}
                                                 </>
                                             ) : (
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: '0.9375rem' }}>
@@ -1717,6 +1883,11 @@ const Dashboard = () => {
                                                                 );
                                                             })}
                                                         </div>
+                                                        {devrevHasMore && (
+                                                            <button className="btn btn-sm btn-secondary" onClick={loadMoreDevrevItems} disabled={devrevLoadingMore} style={{ width: '100%', marginTop: 8 }}>
+                                                                {devrevLoadingMore ? 'Loading...' : 'Load More'}
+                                                            </button>
+                                                        )}
                                                     </>
                                                 ) : (
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: '0.9375rem' }}>
@@ -1805,6 +1976,11 @@ const Dashboard = () => {
                                                             );
                                                         })}
                                                     </div>
+                                                    {linearHasMore && (
+                                                        <button className="btn btn-sm btn-secondary" onClick={loadMoreLinearIssues} disabled={linearLoadingMore} style={{ width: '100%', marginTop: 8 }}>
+                                                            {linearLoadingMore ? 'Loading...' : 'Load More'}
+                                                        </button>
+                                                    )}
                                                 </>
                                             ) : (
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: '0.9375rem' }}>
@@ -1886,6 +2062,11 @@ const Dashboard = () => {
                                                             );
                                                         })}
                                                     </div>
+                                                    {asanaHasMore && (
+                                                        <button className="btn btn-sm btn-secondary" onClick={loadMoreAsanaTasks} disabled={asanaLoadingMore} style={{ width: '100%', marginTop: 8 }}>
+                                                            {asanaLoadingMore ? 'Loading...' : 'Load More'}
+                                                        </button>
+                                                    )}
                                                 </>
                                             ) : (
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: '0.9375rem' }}>
@@ -1969,6 +2150,11 @@ const Dashboard = () => {
                                                             );
                                                         })}
                                                     </div>
+                                                    {clickupHasMore && (
+                                                        <button className="btn btn-sm btn-secondary" onClick={loadMoreClickUpTasks} disabled={clickupLoadingMore} style={{ width: '100%', marginTop: 8 }}>
+                                                            {clickupLoadingMore ? 'Loading...' : 'Load More'}
+                                                        </button>
+                                                    )}
                                                 </>
                                             ) : (
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: '0.9375rem' }}>
@@ -2044,6 +2230,11 @@ const Dashboard = () => {
                                                             );
                                                         })}
                                                     </div>
+                                                    {mondayHasMore && (
+                                                        <button className="btn btn-sm btn-secondary" onClick={loadMoreMondayItems} disabled={mondayLoadingMore} style={{ width: '100%', marginTop: 8 }}>
+                                                            {mondayLoadingMore ? 'Loading...' : 'Load More'}
+                                                        </button>
+                                                    )}
                                                 </>
                                             ) : (
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: '0.9375rem' }}>

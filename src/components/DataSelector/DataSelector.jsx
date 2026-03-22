@@ -28,6 +28,9 @@ const DataSelector = ({
     setDateRange,
     onBack,
     showBackButton,
+    hasMore,
+    onLoadMore,
+    loadingMore,
 }) => {
     return (
         <div className="selector-card-v2">
@@ -139,6 +142,11 @@ const DataSelector = ({
                                         );
                                     })}
                                 </div>
+                                {hasMore && (
+                                    <button className="btn btn-sm btn-secondary" onClick={onLoadMore} disabled={loadingMore} style={{ width: '100%', marginTop: 8 }}>
+                                        {loadingMore ? 'Loading...' : 'Load More'}
+                                    </button>
+                                )}
                             </>
                         )}
                     </div>

@@ -13,6 +13,7 @@ import linearLogo from '../../assets/linear-logo.svg';
 import asanaLogo from '../../assets/asana-logo.svg';
 import clickupLogo from '../../assets/clickup-logo.svg';
 import mondayLogo from '../../assets/monday-logo.svg';
+import confluenceLogo from '../../assets/confluence-logo.svg';
 import './PublishModal.css';
 
 const CHANNEL_META = {
@@ -24,6 +25,7 @@ const CHANNEL_META = {
     asana: { name: 'Asana Task', logo: asanaLogo, destination: 'asana_update' },
     clickup: { name: 'ClickUp Doc', logo: clickupLogo, destination: 'clickup_doc' },
     monday: { name: 'Monday.com Update', logo: mondayLogo, destination: 'monday_update' },
+    confluence: { name: 'Confluence Page', logo: confluenceLogo, destination: 'confluence_page' },
 };
 
 const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJsonContent, isPublished }) => {
@@ -91,6 +93,17 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
     const [mondayBoards, setMondayBoards] = useState([]);
     const [mondayBoard, setMondayBoard] = useState('');
     const [mondayBoardName, setMondayBoardName] = useState('');
+
+    // Confluence config
+    const [confluenceEnabled, setConfluenceEnabled] = useState(false);
+    const [confluenceSpaces, setConfluenceSpaces] = useState([]);
+    const [confluenceSpace, setConfluenceSpace] = useState('');
+    const [confluenceSpaceId, setConfluenceSpaceId] = useState('');
+    const [confluenceSpaceKey, setConfluenceSpaceKey] = useState('');
+    const [confluenceParentPages, setConfluenceParentPages] = useState([]);
+    const [confluenceParentPage, setConfluenceParentPage] = useState('');
+    const [confluenceTitle, setConfluenceTitle] = useState('');
+    const [confluenceError, setConfluenceError] = useState('');
 
     // Public visibility
     const [isPublic, setIsPublic] = useState(false);
@@ -228,6 +241,27 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
         }
     }, [mondayEnabled, connectedServices, mondayBoards.length]);
 
+    // Load Confluence spaces when enabled (reuses Jira token)
+    useEffect(() => {
+        if (confluenceEnabled && confluenceSpaces.length === 0 && connectedServices.includes('jira')) {
+            setConfluenceError('');
+            api.get('/publish/confluence/spaces').then((res) => {
+                setConfluenceSpaces(res.data.spaces || []);
+            }).catch(() => {
+                setConfluenceError('Could not load Confluence spaces. This can happen if the token expired or required scopes were not granted. Please reconnect Jira in Integrations and try again.');
+            });
+        }
+    }, [confluenceEnabled, connectedServices, confluenceSpaces.length]);
+
+    // Load Confluence parent pages when space selected
+    useEffect(() => {
+        if (confluenceSpaceId) {
+            api.get(`/publish/confluence/pages?spaceId=${confluenceSpaceId}`).then((res) => {
+                setConfluenceParentPages(res.data.pages || []);
+            }).catch((err) => { toast.error(err.response?.data?.error || 'Failed to load Confluence pages'); });
+        }
+    }, [confluenceSpaceId]);
+
     // Close on Escape
     useEffect(() => {
         if (!open) return;
@@ -256,7 +290,7 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
 
     const publicUrl = publicSlug ? `${window.location.origin}/n/${publicSlug}` : null;
 
-    const enabledCount = [githubEnabled, jiraEnabled, devrevEnabled, slackEnabled, linearEnabled, asanaEnabled, clickupEnabled, mondayEnabled].filter(Boolean).length;
+    const enabledCount = [githubEnabled, jiraEnabled, devrevEnabled, slackEnabled, linearEnabled, asanaEnabled, clickupEnabled, mondayEnabled, confluenceEnabled].filter(Boolean).length;
 
     // Validation: check required fields per enabled channel
     const hasValidConfig = (() => {
@@ -268,6 +302,7 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
         if (asanaEnabled && !asanaProject) return false;
         if (clickupEnabled && !clickupList) return false;
         if (mondayEnabled && !mondayBoard) return false;
+        if (confluenceEnabled && !confluenceSpaceId) return false;
         return true;
     })();
 
@@ -350,6 +385,18 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                 config: { boardId: mondayBoard, boardName: mondayBoardName },
             });
         }
+        if (confluenceEnabled) {
+            channels.push({
+                type: 'confluence',
+                enabled: true,
+                config: {
+                    spaceId: confluenceSpaceId,
+                    spaceKey: confluenceSpaceKey,
+                    parentPageId: confluenceParentPage || undefined,
+                    title: confluenceTitle || noteTitle,
+                },
+            });
+        }
 
         try {
             const res = await api.post('/publish', {
@@ -385,8 +432,8 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
         } finally {
             setPublishing(false);
         }
-    }, [enabledCount, getHtmlContent, noteId, githubEnabled, jiraEnabled, devrevEnabled, slackEnabled,
-        linearEnabled, asanaEnabled, clickupEnabled, mondayEnabled,
+    }, [enabledCount, getHtmlContent, noteId, noteTitle, githubEnabled, jiraEnabled, devrevEnabled, slackEnabled,
+        linearEnabled, asanaEnabled, clickupEnabled, mondayEnabled, confluenceEnabled,
         ghRepo, ghTag, ghTitle, ghPrerelease, ghDraft,
         jiraProject, jiraVersionName, jiraMarkReleased, jiraAddComments,
         devrevTitle, devrevStatus, devrevAccess, devrevPart,
@@ -394,7 +441,8 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
         linearProject, linearProjectName,
         asanaProject, asanaProjectName, asanaStatusType,
         clickupList, clickupListName,
-        mondayBoard, mondayBoardName]);
+        mondayBoard, mondayBoardName,
+        confluenceSpaceId, confluenceSpaceKey, confluenceParentPage, confluenceTitle]);
 
     const handleRetry = useCallback(async (channelType) => {
         setPublishing(true);
@@ -416,6 +464,8 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
             config = { listId: clickupList, listName: clickupListName };
         } else if (channelType === 'monday') {
             config = { boardId: mondayBoard, boardName: mondayBoardName };
+        } else if (channelType === 'confluence') {
+            config = { spaceId: confluenceSpaceId, spaceKey: confluenceSpaceKey, parentPageId: confluenceParentPage || undefined, title: confluenceTitle || noteTitle };
         } else {
             config = { title: devrevTitle, status: devrevStatus, accessLevel: devrevAccess, partId: devrevPart || undefined, partName: devrevPart ? devrevParts.find(p => p.id === devrevPart)?.name : undefined };
         }
@@ -568,7 +618,7 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                             </div>
 
                             {/* GitHub */}
-                            <ChannelCard
+                            {isConnected('github') && <ChannelCard
                                 type="github"
                                 enabled={githubEnabled}
                                 onToggle={setGithubEnabled}
@@ -615,47 +665,10 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                     <span className="config-row-label">Draft</span>
                                     <MiniToggle checked={ghDraft} onChange={setGhDraft} />
                                 </div>
-                            </ChannelCard>
-
-                            {/* Jira */}
-                            <ChannelCard
-                                type="jira"
-                                enabled={jiraEnabled}
-                                onToggle={setJiraEnabled}
-                                connected={isConnected('jira')}
-                                published={publishedChannels.includes('jira')}
-                                onNavigate={(path) => { onClose(); navigate(path); }}
-                            >
-                                <div className="config-field">
-                                    <label>Project</label>
-                                    <select value={jiraProject} onChange={(e) => setJiraProject(e.target.value)}>
-                                        <option value="">Select project...</option>
-                                        {jiraProjects.map((p) => (
-                                            <option key={p.key} value={p.key}>{p.name} ({p.key})</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="config-field">
-                                    <label>Version Name</label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. v2.4.0"
-                                        value={jiraVersionName}
-                                        onChange={(e) => setJiraVersionName(e.target.value)}
-                                    />
-                                </div>
-                                <div className="config-row">
-                                    <span className="config-row-label">Mark as Released</span>
-                                    <MiniToggle checked={jiraMarkReleased} onChange={setJiraMarkReleased} />
-                                </div>
-                                <div className="config-row">
-                                    <span className="config-row-label">Add comments to issues</span>
-                                    <MiniToggle checked={jiraAddComments} onChange={setJiraAddComments} />
-                                </div>
-                            </ChannelCard>
+                            </ChannelCard>}
 
                             {/* DevRev */}
-                            <ChannelCard
+                            {isConnected('devrev') && <ChannelCard
                                 type="devrev"
                                 enabled={devrevEnabled}
                                 onToggle={setDevrevEnabled}
@@ -699,10 +712,10 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                         </select>
                                     </div>
                                 )}
-                            </ChannelCard>
+                            </ChannelCard>}
 
                             {/* Slack */}
-                            <ChannelCard
+                            {isConnected('slack') && <ChannelCard
                                 type="slack"
                                 enabled={slackEnabled}
                                 onToggle={setSlackEnabled}
@@ -728,10 +741,10 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                 <span style={{ fontSize: 11, color: 'var(--muted)', display: 'block' }}>
                                     Posts AI summary + full notes as attachment
                                 </span>
-                            </ChannelCard>
+                            </ChannelCard>}
 
                             {/* Linear */}
-                            <ChannelCard
+                            {isConnected('linear') && <ChannelCard
                                 type="linear"
                                 enabled={linearEnabled}
                                 onToggle={setLinearEnabled}
@@ -752,10 +765,10 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                         ))}
                                     </select>
                                 </div>
-                            </ChannelCard>
+                            </ChannelCard>}
 
                             {/* Asana */}
-                            <ChannelCard
+                            {isConnected('asana') && <ChannelCard
                                 type="asana"
                                 enabled={asanaEnabled}
                                 onToggle={setAsanaEnabled}
@@ -776,10 +789,10 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                         ))}
                                     </select>
                                 </div>
-                            </ChannelCard>
+                            </ChannelCard>}
 
                             {/* ClickUp */}
-                            <ChannelCard
+                            {isConnected('clickup') && <ChannelCard
                                 type="clickup"
                                 enabled={clickupEnabled}
                                 onToggle={setClickupEnabled}
@@ -822,10 +835,10 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                         </select>
                                     </div>
                                 )}
-                            </ChannelCard>
+                            </ChannelCard>}
 
                             {/* Monday */}
-                            <ChannelCard
+                            {isConnected('monday') && <ChannelCard
                                 type="monday"
                                 enabled={mondayEnabled}
                                 onToggle={setMondayEnabled}
@@ -846,7 +859,73 @@ const PublishModal = ({ open, onClose, noteId, noteTitle, getHtmlContent, getJso
                                         ))}
                                     </select>
                                 </div>
-                            </ChannelCard>
+                            </ChannelCard>}
+
+                            {/* Confluence */}
+                            {isConnected('jira') && <ChannelCard
+                                type="confluence"
+                                enabled={confluenceEnabled}
+                                onToggle={setConfluenceEnabled}
+                                connected={isConnected('jira')}
+                                published={publishedChannels.includes('confluence')}
+                                onNavigate={(path) => { onClose(); navigate(path); }}
+                            >
+                                {confluenceError && (
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px', background: 'var(--amber-il, #fffbeb)', borderRadius: 'var(--rs, 8px)', fontSize: 12, color: 'var(--amber-it, #92400e)', lineHeight: 1.5 }}>
+                                        <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+                                        <span>{confluenceError}</span>
+                                    </div>
+                                )}
+                                <div className="config-field">
+                                    <label>Space</label>
+                                    <select value={confluenceSpace} onChange={(e) => {
+                                        setConfluenceSpace(e.target.value);
+                                        const selected = confluenceSpaces.find(s => s.id === e.target.value);
+                                        setConfluenceSpaceId(selected ? selected.id : '');
+                                        setConfluenceSpaceKey(selected ? selected.key : '');
+                                        setConfluenceParentPage('');
+                                        setConfluenceParentPages([]);
+                                    }}>
+                                        <option value="">Select space...</option>
+                                        {confluenceSpaces.map((s) => (
+                                            <option key={s.id} value={s.id}>{s.name} ({s.key})</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {confluenceSpaceId && (
+                                    <div className="config-field">
+                                        <label>Parent Page (optional)</label>
+                                        <select value={confluenceParentPage} onChange={(e) => setConfluenceParentPage(e.target.value)}>
+                                            <option value="">Top-level page (no parent)</option>
+                                            {confluenceParentPages.map((p) => (
+                                                <option key={p.id} value={p.id}>{p.title}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                                <div className="config-field">
+                                    <label>Page Title</label>
+                                    <input
+                                        type="text"
+                                        placeholder={noteTitle || 'Release Notes'}
+                                        value={confluenceTitle}
+                                        onChange={(e) => setConfluenceTitle(e.target.value)}
+                                    />
+                                </div>
+                                <span style={{ fontSize: 11, color: 'var(--muted)', display: 'block' }}>
+                                    Uses your Jira connection (same Atlassian account)
+                                </span>
+                            </ChannelCard>}
+
+                            {/* Empty state when no integrations connected */}
+                            {!connectedServices.length && (
+                                <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
+                                    <p style={{ marginBottom: 8 }}>No integrations connected yet.</p>
+                                    <button className="btn btn-sm btn-secondary" onClick={() => { onClose(); navigate('/integration'); }}>
+                                        Go to Integrations
+                                    </button>
+                                </div>
+                            )}
                         </>
                     )}
 
