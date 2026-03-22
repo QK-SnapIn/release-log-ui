@@ -64,7 +64,7 @@ export default function LLMSelector({ catalogue, savedKeys, llmConfig, onChange,
               <div className="llm-selector-key-status saved">
                 <span className="llm-selector-check">&#10003;</span>
                 Using your saved {providerConfig?.label} key ({savedKey.maskedKey})
-                <Link to="/settings" className="llm-selector-settings-link">
+                <Link to="/settings?tab=keys" className="llm-selector-settings-link">
                   <Settings size={12} /> Settings
                 </Link>
               </div>
@@ -80,7 +80,7 @@ export default function LLMSelector({ catalogue, savedKeys, llmConfig, onChange,
                       Use a one-time key
                     </button>
                     <span className="llm-selector-or">or</span>
-                    <Link to="/settings" className="llm-selector-settings-link">
+                    <Link to="/settings?tab=keys" className="llm-selector-settings-link">
                       <Settings size={12} /> Add in Settings
                     </Link>
                   </>
@@ -108,7 +108,7 @@ export default function LLMSelector({ catalogue, savedKeys, llmConfig, onChange,
 
         {isBuiltin && (
           <div className="llm-selector-key-status default-info">
-            Using Releaslyy AI — free, no API key needed. <Link to="/settings" className="llm-selector-settings-link">Add your own key for more control <ExternalLink size={11} /></Link>
+            Using Releaslyy AI — free, no API key needed. <Link to="/settings?tab=keys" className="llm-selector-settings-link">Add your own key for more control <ExternalLink size={11} /></Link>
           </div>
         )}
       </div>

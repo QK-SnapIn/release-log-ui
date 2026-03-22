@@ -56,7 +56,7 @@ const SERVICE_LABELS = { github: 'GitHub', devrev: 'DevRev', jira: 'Jira', linea
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const { savedKeys, catalogue } = useLLMKeys();
+    const { savedKeys, catalogue, defaultProvider } = useLLMKeys();
     const { canUse, usage, entitlements, refetch: refetchEntitlements } = useEntitlements();
     const { user } = useUser();
     const { connections, services, loading: tokensLoading } = useTokens();
@@ -180,6 +180,18 @@ const Dashboard = () => {
     const [advancedOpen, setAdvancedOpen] = useState(false);
     const [audienceOptions, setAudienceOptions] = useState([]);
     const [audiencesLoading, setAudiencesLoading] = useState(true);
+
+    // Auto-select user's default LLM provider if configured
+    useEffect(() => {
+        if (defaultProvider && catalogue?.[defaultProvider]) {
+            const saved = savedKeys.find(k => k.provider === defaultProvider);
+            setLlmConfig({
+                provider: defaultProvider,
+                model: saved?.preferredModel || catalogue[defaultProvider].defaultModel,
+                apiKeyOverride: null,
+            });
+        }
+    }, [defaultProvider, catalogue, savedKeys]);
 
     // -- Generate Wizard State --
     const [step, setStep] = useState(1);

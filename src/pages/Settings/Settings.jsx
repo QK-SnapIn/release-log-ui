@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { User, CreditCard, BarChart3, Key, Link2, FolderOpen } from 'lucide-react';
 import TopBar from '../../components/Header/Header';
 import BasicInfo from './BasicInfo';
@@ -26,7 +27,11 @@ const tabContent = {
 };
 
 const Settings = () => {
-    const [activeTab, setActiveTab] = useState('basic');
+    const [searchParams] = useSearchParams();
+    const [activeTab, setActiveTab] = useState(() => {
+        const tabParam = searchParams.get('tab');
+        return tabParam && tabContent[tabParam] ? tabParam : 'basic';
+    });
     const [animKey, setAnimKey] = useState(0);
     const ActiveComponent = tabContent[activeTab];
 

@@ -364,193 +364,108 @@ const Integration = () => {
         if (!tokensLoading) setConnections(sharedConnections);
     }, [sharedConnections, tokensLoading]);
 
-    // Handle Jira OAuth callback redirect
+    // Handle OAuth callback — this runs in the new tab opened by window.open()
+    // It notifies the opener tab via postMessage and closes itself
     useEffect(() => {
-        const jiraStatus = searchParams.get('jira');
-        if (jiraStatus === 'success') {
-            setConnections(prev => ({ ...prev, jira: true }));
-            refetchTokens();
-            setSearchParams({}, { replace: true });
-        } else if (jiraStatus === 'select_site') {
-            try {
-                const sites = JSON.parse(searchParams.get('sites') || '[]');
+        const OAUTH_SERVICES = ['github', 'jira', 'slack', 'linear', 'asana', 'clickup', 'monday'];
+        const LABELS = { github: 'GitHub', jira: 'Jira', slack: 'Slack', linear: 'Linear', asana: 'Asana', clickup: 'ClickUp', monday: 'Monday.com' };
+
+        for (const service of OAUTH_SERVICES) {
+            const status = searchParams.get(service);
+            if (!status) continue;
+
+            if (status === 'success') {
+                // Try notifying opener tab and closing this tab
+                if (window.opener && !window.opener.closed) {
+                    try {
+                        window.opener.postMessage({ type: 'oauth-success', service }, window.location.origin);
+                    } catch { /* cross-origin or dead opener — fall through */ }
+                    window.close();
+                    // window.close() may fail if browser lost opener ref after redirects
+                    // Fall through to handle locally if tab didn't close
+                }
+                setConnections(prev => ({ ...prev, [service]: true }));
+                refetchTokens();
+                toast.success(`${LABELS[service]} connected successfully!`);
+                setSearchParams({}, { replace: true });
+            } else if (status === 'error') {
+                const message = searchParams.get('message') || `${LABELS[service]} connection failed`;
+                if (window.opener && !window.opener.closed) {
+                    try {
+                        window.opener.postMessage({ type: 'oauth-error', service, message }, window.location.origin);
+                    } catch { /* fall through */ }
+                    window.close();
+                }
+                setErrorState(prev => ({ ...prev, [service]: message }));
+                setSearchParams({}, { replace: true });
+            } else if (service === 'jira' && status === 'select_site') {
+                // Jira multi-site: pass sites back to opener if possible, else handle locally
+                let sites = [];
+                try { sites = JSON.parse(searchParams.get('sites') || '[]'); } catch { /* ignore */ }
+                if (sites.length && window.opener && !window.opener.closed) {
+                    try {
+                        window.opener.postMessage({ type: 'oauth-jira-sites', service: 'jira', sites }, window.location.origin);
+                    } catch { /* fall through */ }
+                    window.close();
+                }
                 if (sites.length) setJiraSites(sites);
-            } catch { /* ignore parse errors */ }
-            setSearchParams({}, { replace: true });
-        } else if (jiraStatus === 'error') {
-            setErrorState(prev => ({ ...prev, jira: searchParams.get('message') || 'Jira connection failed' }));
-            setSearchParams({}, { replace: true });
-        }
+                setSearchParams({}, { replace: true });
+            }
 
-        // Handle GitHub OAuth callback redirect
-        const githubStatus = searchParams.get('github');
-        if (githubStatus === 'success') {
-            setConnections(prev => ({ ...prev, github: true }));
-            refetchTokens();
-            toast.success('GitHub connected successfully!');
-            setSearchParams({}, { replace: true });
-        } else if (githubStatus === 'error') {
-            const message = searchParams.get('message') || 'GitHub connection failed';
-            setErrorState(prev => ({ ...prev, github: message }));
-            setSearchParams({}, { replace: true });
-        }
-
-        // Handle Slack OAuth callback redirect
-        const slackStatus = searchParams.get('slack');
-        if (slackStatus === 'success') {
-            setConnections(prev => ({ ...prev, slack: true }));
-            refetchTokens();
-            toast.success('Slack connected successfully!');
-            setSearchParams({}, { replace: true });
-        } else if (slackStatus === 'error') {
-            const message = searchParams.get('message') || 'Slack connection failed';
-            setErrorState(prev => ({ ...prev, slack: message }));
-            setSearchParams({}, { replace: true });
-        }
-
-        // Handle Linear OAuth callback redirect
-        const linearStatus = searchParams.get('linear');
-        if (linearStatus === 'success') {
-            setConnections(prev => ({ ...prev, linear: true }));
-            refetchTokens();
-            toast.success('Linear connected successfully!');
-            setSearchParams({}, { replace: true });
-        } else if (linearStatus === 'error') {
-            const message = searchParams.get('message') || 'Linear connection failed';
-            setErrorState(prev => ({ ...prev, linear: message }));
-            setSearchParams({}, { replace: true });
-        }
-
-        // Handle Asana OAuth callback redirect
-        const asanaStatus = searchParams.get('asana');
-        if (asanaStatus === 'success') {
-            setConnections(prev => ({ ...prev, asana: true }));
-            refetchTokens();
-            toast.success('Asana connected successfully!');
-            setSearchParams({}, { replace: true });
-        } else if (asanaStatus === 'error') {
-            const message = searchParams.get('message') || 'Asana connection failed';
-            setErrorState(prev => ({ ...prev, asana: message }));
-            setSearchParams({}, { replace: true });
-        }
-
-        // Handle ClickUp OAuth callback redirect
-        const clickupStatus = searchParams.get('clickup');
-        if (clickupStatus === 'success') {
-            setConnections(prev => ({ ...prev, clickup: true }));
-            refetchTokens();
-            toast.success('ClickUp connected successfully!');
-            setSearchParams({}, { replace: true });
-        } else if (clickupStatus === 'error') {
-            const message = searchParams.get('message') || 'ClickUp connection failed';
-            setErrorState(prev => ({ ...prev, clickup: message }));
-            setSearchParams({}, { replace: true });
-        }
-
-        // Handle Monday OAuth callback redirect
-        const mondayStatus = searchParams.get('monday');
-        if (mondayStatus === 'success') {
-            setConnections(prev => ({ ...prev, monday: true }));
-            refetchTokens();
-            toast.success('Monday.com connected successfully!');
-            setSearchParams({}, { replace: true });
-        } else if (mondayStatus === 'error') {
-            const message = searchParams.get('message') || 'Monday.com connection failed';
-            setErrorState(prev => ({ ...prev, monday: message }));
-            setSearchParams({}, { replace: true });
+            break; // only process first matching service
         }
     }, [searchParams, setSearchParams]);
 
-    const handleJiraOAuth = async () => {
+    // Listen for postMessage from the OAuth new tab
+    useEffect(() => {
+        const LABELS = { github: 'GitHub', jira: 'Jira', slack: 'Slack', linear: 'Linear', asana: 'Asana', clickup: 'ClickUp', monday: 'Monday.com' };
+
+        const handleMessage = (event) => {
+            if (event.origin !== window.location.origin) return;
+            const { type, service, message, sites } = event.data || {};
+
+            if (type === 'oauth-success' && service) {
+                setConnections(prev => ({ ...prev, [service]: true }));
+                refetchTokens();
+                toast.success(`${LABELS[service] || service} connected successfully!`);
+            } else if (type === 'oauth-error' && service) {
+                setErrorState(prev => ({ ...prev, [service]: message || `${LABELS[service] || service} connection failed` }));
+                toast.error(message || `${LABELS[service] || service} connection failed`);
+            } else if (type === 'oauth-jira-sites' && sites?.length) {
+                setJiraSites(sites);
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [refetchTokens]);
+
+    const startOAuth = async (service, authEndpoint, label) => {
         try {
-            setLoadingState(prev => ({ ...prev, jira: true }));
-            const res = await api.get('/jira/auth');
-            window.location.href = res.data.authUrl;
+            setLoadingState(prev => ({ ...prev, [service]: true }));
+            const res = await api.get(authEndpoint);
+            const popup = window.open(res.data.authUrl, '_blank');
+            // If popup was blocked, fall back to same-tab navigation
+            if (!popup || popup.closed) {
+                window.location.href = res.data.authUrl;
+                return;
+            }
+            setLoadingState(prev => ({ ...prev, [service]: false }));
         } catch (err) {
-            const msg = err.response?.data?.error || 'Failed to start Jira OAuth';
+            const msg = err.response?.data?.error || `Failed to start ${label} OAuth`;
             toast.error(msg);
-            setErrorState(prev => ({ ...prev, jira: msg }));
-            setLoadingState(prev => ({ ...prev, jira: false }));
+            setErrorState(prev => ({ ...prev, [service]: msg }));
+            setLoadingState(prev => ({ ...prev, [service]: false }));
         }
     };
 
-    const handleGitHubOAuth = async () => {
-        try {
-            setLoadingState(prev => ({ ...prev, github: true }));
-            const res = await api.get('/github/auth');
-            window.location.href = res.data.authUrl;
-        } catch (err) {
-            const msg = err.response?.data?.error || 'Failed to start GitHub OAuth';
-            toast.error(msg);
-            setErrorState(prev => ({ ...prev, github: msg }));
-            setLoadingState(prev => ({ ...prev, github: false }));
-        }
-    };
-
-    const handleSlackOAuth = async () => {
-        try {
-            setLoadingState(prev => ({ ...prev, slack: true }));
-            const res = await api.get('/slack/auth');
-            window.location.href = res.data.authUrl;
-        } catch (err) {
-            const msg = err.response?.data?.error || 'Failed to start Slack OAuth';
-            toast.error(msg);
-            setErrorState(prev => ({ ...prev, slack: msg }));
-            setLoadingState(prev => ({ ...prev, slack: false }));
-        }
-    };
-
-    const handleLinearOAuth = async () => {
-        try {
-            setLoadingState(prev => ({ ...prev, linear: true }));
-            const res = await api.get('/linear/auth');
-            window.location.href = res.data.authUrl;
-        } catch (err) {
-            const msg = err.response?.data?.error || 'Failed to start Linear OAuth';
-            toast.error(msg);
-            setErrorState(prev => ({ ...prev, linear: msg }));
-            setLoadingState(prev => ({ ...prev, linear: false }));
-        }
-    };
-
-    const handleAsanaOAuth = async () => {
-        try {
-            setLoadingState(prev => ({ ...prev, asana: true }));
-            const res = await api.get('/asana/auth');
-            window.location.href = res.data.authUrl;
-        } catch (err) {
-            const msg = err.response?.data?.error || 'Failed to start Asana OAuth';
-            toast.error(msg);
-            setErrorState(prev => ({ ...prev, asana: msg }));
-            setLoadingState(prev => ({ ...prev, asana: false }));
-        }
-    };
-
-    const handleClickUpOAuth = async () => {
-        try {
-            setLoadingState(prev => ({ ...prev, clickup: true }));
-            const res = await api.get('/clickup/auth');
-            window.location.href = res.data.authUrl;
-        } catch (err) {
-            const msg = err.response?.data?.error || 'Failed to start ClickUp OAuth';
-            toast.error(msg);
-            setErrorState(prev => ({ ...prev, clickup: msg }));
-            setLoadingState(prev => ({ ...prev, clickup: false }));
-        }
-    };
-
-    const handleMondayOAuth = async () => {
-        try {
-            setLoadingState(prev => ({ ...prev, monday: true }));
-            const res = await api.get('/monday/auth');
-            window.location.href = res.data.authUrl;
-        } catch (err) {
-            const msg = err.response?.data?.error || 'Failed to start Monday.com OAuth';
-            toast.error(msg);
-            setErrorState(prev => ({ ...prev, monday: msg }));
-            setLoadingState(prev => ({ ...prev, monday: false }));
-        }
-    };
+    const handleJiraOAuth = () => startOAuth('jira', '/jira/auth', 'Jira');
+    const handleGitHubOAuth = () => startOAuth('github', '/github/auth', 'GitHub');
+    const handleSlackOAuth = () => startOAuth('slack', '/slack/auth', 'Slack');
+    const handleLinearOAuth = () => startOAuth('linear', '/linear/auth', 'Linear');
+    const handleAsanaOAuth = () => startOAuth('asana', '/asana/auth', 'Asana');
+    const handleClickUpOAuth = () => startOAuth('clickup', '/clickup/auth', 'ClickUp');
+    const handleMondayOAuth = () => startOAuth('monday', '/monday/auth', 'Monday.com');
 
     const handleSelectJiraSite = async (siteId) => {
         setSiteSelectLoading(true);
